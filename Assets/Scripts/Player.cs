@@ -5,6 +5,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     private float _speed = 7.0f;
+    private int _lives = 3;
 
     private float _xLeftBound = -9.2f;
     private float _xRightBound = 9.2f;
@@ -36,7 +37,7 @@ public class Player : MonoBehaviour
 
     }
 
-    void Movement()
+    private void Movement()
     {
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         float verticalInput = Input.GetAxisRaw("Vertical");
@@ -49,9 +50,19 @@ public class Player : MonoBehaviour
         transform.position = new Vector3(transform.position.x, Mathf.Clamp(transform.position.y, _yBottomBound, _yUpperBound), 0);
     }
 
-    void FireLaser()
+    private void FireLaser()
     {
         Instantiate(_laserPrefab, transform.position + _offset, Quaternion.identity);
         _canFire = Time.time + _fireRate;
+    }
+
+    public void Damage()
+    {
+        _lives--;
+
+        if (_lives < 1)
+        {
+            Destroy(this.gameObject);
+        }
     }
 }
