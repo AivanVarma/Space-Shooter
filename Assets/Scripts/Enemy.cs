@@ -14,13 +14,19 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        transform.position = RandomXPosition();
     }
 
     // Update is called once per frame
     void Update()
     {
-        Movement();
+       Movement();
+    }
+
+    private Vector3 RandomXPosition()
+    {
+        float xRandom = Random.Range(_xLeftBound, _xRightBound);
+        return new Vector3(xRandom, _yUpperBound, 0);
     }
 
     private void Movement()
@@ -29,8 +35,7 @@ public class Enemy : MonoBehaviour
 
         if (transform.position.y < _yBottomBound)
         {
-            float xRandom = Random.Range(_xLeftBound, _xRightBound);
-            transform.position = new Vector3(xRandom, _yUpperBound, 0);
+            transform.position = RandomXPosition();
         }
     }
 

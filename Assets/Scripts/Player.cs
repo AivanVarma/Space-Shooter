@@ -4,7 +4,11 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private float _speed = 7.0f;
+    private SpawnManager _spawnManager;
+
+    private Vector3 _startingPosition = new Vector3(0, 0, 0);
+
+    private float _speed = 5.0f;
     private int _lives = 3;
 
     private float _xLeftBound = -9.2f;
@@ -18,11 +22,22 @@ public class Player : MonoBehaviour
     private float _canFire = -1f;
     private float _fireRate = 0.15f;
 
-
     // Start is called before the first frame update
     void Start()
     {
-        transform.position = new Vector3(0,0,0);
+        transform.position = _startingPosition;
+
+        _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
+
+        if (_spawnManager == null)
+        {
+            Debug.LogError("The Spawn Manager is NULL!");
+        }
+
+        if (_laserPrefab == null)
+        {
+            Debug.LogError("The Laser prefab is NULL!");
+        }
     }
 
     // Update is called once per frame
@@ -34,7 +49,6 @@ public class Player : MonoBehaviour
         {
             FireLaser();
         }
-
     }
 
     private void Movement()
@@ -62,6 +76,7 @@ public class Player : MonoBehaviour
 
         if (_lives < 1)
         {
+            _spawnManager.OnPlayerDeath();
             Destroy(this.gameObject);
         }
     }
