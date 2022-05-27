@@ -20,6 +20,11 @@ public class Laser : MonoBehaviour
 
         if (transform.position.y > _yUpperBound)
         {
+            if (transform.parent != null)
+            {
+                Destroy(this.transform.parent.gameObject);
+            }
+
             Destroy(this.gameObject);
         }
     }

@@ -39,11 +39,11 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (other.CompareTag("Player"))
+        if (collision.CompareTag("Player"))
         {
-            Player player = other.transform.GetComponent<Player>();
+            Player player = collision.transform.GetComponent<Player>();
 
             if (player != null)
             {
@@ -53,9 +53,9 @@ public class Enemy : MonoBehaviour
             Destroy(this.gameObject);
         }
 
-        if (other.CompareTag("Laser"))
+        if (collision.CompareTag("Laser"))
         {
-            Destroy(other.gameObject);
+            Destroy(collision.gameObject);
             Destroy(this.gameObject);
         }
     }
