@@ -22,16 +22,24 @@ public class Player : MonoBehaviour
     private float _canFire = -1f;
     private float _fireRate = 0.15f;
 
+    private float _powerupActiveTime = 5f;
+    private WaitForSeconds _powerupWaitTime;
+
     [SerializeField]
     private GameObject _tripleShotPrefab;
     [SerializeField]
     private bool _isTripleShotActive = false;
-    private float _tripleShotActiveTime = 5f;
+
+    private float _speedBoost = 1f;
+    private float _speedBoostBaseCoefficient = 1f;
+    private float _speedBoostCoefficient = 3f;
 
     // Start is called before the first frame update
     void Start()
     {
         transform.position = _startingPosition;
+
+        _powerupWaitTime = new WaitForSeconds(_powerupActiveTime);
 
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
 
@@ -69,7 +77,7 @@ public class Player : MonoBehaviour
 
         Vector3 direction = new Vector3(horizontalInput, verticalInput, 0).normalized;
 
-        transform.Translate(_speed * Time.deltaTime * direction);
+        transform.Translate(_speedBoost * _speed * Time.deltaTime * direction);
 
         transform.position = new Vector3(Mathf.Clamp(transform.position.x, _xLeftBound, _xRightBound), transform.position.y, 0);
         transform.position = new Vector3(transform.position.x, Mathf.Clamp(transform.position.y, _yBottomBound, _yUpperBound), 0);
@@ -106,10 +114,22 @@ public class Player : MonoBehaviour
         StartCoroutine(TripleShotPowerDownRoutine());
     }
 
+    public void SpeedBoostActive()
+    {
+        _speedBoost = _speedBoostCoefficient;
+        StartCoroutine(SpeedBoostPowerDownRoutine());
+    }
+
     IEnumerator TripleShotPowerDownRoutine()
     {
-        yield return new WaitForSeconds(_tripleShotActiveTime);
+        yield return _powerupWaitTime;
 
         _isTripleShotActive = false;
+    }
+    IEnumerator SpeedBoostPowerDownRoutine()
+    {
+        yield return _powerupWaitTime;
+
+        _speedBoost = _speedBoostBaseCoefficient;
     }
 }

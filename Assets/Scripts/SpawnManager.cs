@@ -9,7 +9,7 @@ public class SpawnManager : MonoBehaviour
     private float _spawnInterval = 1f;
 
     [SerializeField]
-    private GameObject _tripleShotPowerupPrefab;
+    private GameObject[] _powerups;
     private float _minSpawnTime = 3f;
     private float _maxSpawnTime = 7f;
 
@@ -24,11 +24,6 @@ public class SpawnManager : MonoBehaviour
         if (_enemyPrefab == null)
         {
             Debug.LogError("The Enemy prefab is NULL!");
-        }
-
-        if (_tripleShotPowerupPrefab == null)
-        {
-            Debug.LogError("The Triple Shot powerup prefab is NULL!");
         }
 
         StartCoroutine(SpawnEnemyRoutine());
@@ -54,7 +49,9 @@ public class SpawnManager : MonoBehaviour
         {
             yield return new WaitForSeconds(Random.Range(_minSpawnTime, _maxSpawnTime));
 
-            Instantiate(_tripleShotPowerupPrefab);
+            int randomPowerup = Random.Range(0, 2);
+
+            Instantiate(_powerups[randomPowerup]);
         }
     }
 
