@@ -49,7 +49,7 @@ public class SpawnManager : MonoBehaviour
         {
             yield return new WaitForSeconds(Random.Range(_minSpawnTime, _maxSpawnTime));
 
-            int randomPowerup = Random.Range(0, 2);
+            int randomPowerup = Random.Range(0, 3);
 
             Instantiate(_powerups[randomPowerup]);
         }

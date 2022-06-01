@@ -53,6 +53,10 @@ public class Powerup : MonoBehaviour
                         player.SpeedBoostActive();
                         break;
                     case 2:
+                        player.ShieldsActive();
+                        break;
+                    default:
+                        Debug.Log("Power up ID not found!");
                         break;
                 }
                 

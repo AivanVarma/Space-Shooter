@@ -34,10 +34,15 @@ public class Player : MonoBehaviour
     private float _speedBoostBaseCoefficient = 1f;
     private float _speedBoostCoefficient = 3f;
 
+    [SerializeField]
+    private GameObject _shields;
+    private bool _isShieldActive = false;
+
     // Start is called before the first frame update
     void Start()
     {
         transform.position = _startingPosition;
+        _shields.SetActive(_isShieldActive);
 
         _powerupWaitTime = new WaitForSeconds(_powerupActiveTime);
 
@@ -99,6 +104,13 @@ public class Player : MonoBehaviour
 
     public void Damage()
     {
+        if (_isShieldActive)
+        {
+            _isShieldActive = false;
+            _shields.SetActive(_isShieldActive);
+            return;
+        }
+
         //_lives--;
 
         if (_lives < 1)
@@ -118,6 +130,12 @@ public class Player : MonoBehaviour
     {
         _speedBoost = _speedBoostCoefficient;
         StartCoroutine(SpeedBoostPowerDownRoutine());
+    }
+
+    public void ShieldsActive()
+    {
+        _isShieldActive = true;
+        _shields.SetActive(_isShieldActive);
     }
 
     IEnumerator TripleShotPowerDownRoutine()
