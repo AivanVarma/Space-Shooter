@@ -4,17 +4,26 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    private float _speed = 5f;
+    private float _speed = 3.5f;
 
     private float _xLeftBound = -9.2f;
     private float _xRightBound = 9.2f;
     private float _yBottomBound = -6f;
     private float _yUpperBound = 8f;
 
+    private Player _player;
+
     // Start is called before the first frame update
     void Start()
     {
         transform.position = RandomXPosition();
+
+        _player = GameObject.Find("Player").GetComponent<Player>();
+
+        if ( _player == null )
+        {
+            Debug.LogError("The Player is NULL!");
+        }
     }
 
     // Update is called once per frame
@@ -54,8 +63,11 @@ public class Enemy : MonoBehaviour
         }
 
         if (collision.CompareTag("Laser"))
-        {
+        {            
             Destroy(collision.gameObject);
+
+            _player.AddPoints(10);
+
             Destroy(this.gameObject);
         }
     }

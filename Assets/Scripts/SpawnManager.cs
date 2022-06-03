@@ -32,26 +32,28 @@ public class SpawnManager : MonoBehaviour
 
     IEnumerator SpawnEnemyRoutine()
     {
-        yield return new WaitForSeconds(10f);
+        yield return new WaitForSeconds(2f);
 
         while (!_stopSpawning)
         {
-            yield return new WaitForSeconds(_spawnInterval);
-
             GameObject newEnemy = Instantiate(_enemyPrefab);
             newEnemy.transform.parent = _enemyContainer.transform;
+
+            yield return new WaitForSeconds(_spawnInterval);
         }
     }
 
     IEnumerator SpawnPowerupRoutine()
     {
+        yield return new WaitForSeconds(2f);
+
         while (!_stopSpawning)
         {
-            yield return new WaitForSeconds(Random.Range(_minSpawnTime, _maxSpawnTime));
-
             int randomPowerup = Random.Range(0, 3);
 
             Instantiate(_powerups[randomPowerup]);
+
+            yield return new WaitForSeconds(Random.Range(_minSpawnTime, _maxSpawnTime));
         }
     }
 

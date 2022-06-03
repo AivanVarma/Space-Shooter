@@ -5,11 +5,13 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     private SpawnManager _spawnManager;
+    private UIManager _uiManager;
 
     private Vector3 _startingPosition = new Vector3(0, 0, 0);
 
     private float _speed = 5.0f;
     private int _lives = 3;
+    private int _score = 0;
 
     private float _xLeftBound = -9.2f;
     private float _xRightBound = 9.2f;
@@ -48,9 +50,16 @@ public class Player : MonoBehaviour
 
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
 
+        _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
+
         if (_spawnManager == null)
         {
             Debug.LogError("The Spawn Manager is NULL!");
+        }
+
+        if (_uiManager == null)
+        {
+            Debug.LogError("The UI Manager is NULL!");
         }
 
         if (_laserPrefab == null)
@@ -111,11 +120,14 @@ public class Player : MonoBehaviour
             return;
         }
 
-        //_lives--;
+        _lives--;
+
+        _uiManager.UpdateLives(_lives);
 
         if (_lives < 1)
         {
             _spawnManager.OnPlayerDeath();
+
             Destroy(this.gameObject);
         }
     }
@@ -136,6 +148,13 @@ public class Player : MonoBehaviour
     {
         _isShieldActive = true;
         _shields.SetActive(_isShieldActive);
+    }
+
+    public void AddPoints (int points)
+    {
+        _score += points;
+
+        _uiManager.UpdateScore(_score);
     }
 
     IEnumerator TripleShotPowerDownRoutine()
