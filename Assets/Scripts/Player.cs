@@ -40,6 +40,9 @@ public class Player : MonoBehaviour
     private GameObject _shields;
     private bool _isShieldActive = false;
 
+    [SerializeField]
+    private GameObject[] _engineDamage;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -122,6 +125,8 @@ public class Player : MonoBehaviour
 
         _lives--;
 
+        EngineDamage();
+
         _uiManager.UpdateLives(_lives);
 
         if (_lives < 1)
@@ -129,6 +134,27 @@ public class Player : MonoBehaviour
             _spawnManager.OnPlayerDeath();
 
             Destroy(this.gameObject);
+        }
+    }
+
+    private void EngineDamage()
+    {
+        switch (_lives)
+        {
+            case 1:
+                if (!_engineDamage[0].activeSelf)
+                {
+                    _engineDamage[0].SetActive(true);
+                }
+                else
+                {
+                    _engineDamage[1].SetActive(true);
+                }
+                break;
+            case 2:
+                int engine = Random.Range(0, 2);
+                _engineDamage[engine].SetActive(true);
+                break;
         }
     }
 

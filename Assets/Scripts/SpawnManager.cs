@@ -18,21 +18,17 @@ public class SpawnManager : MonoBehaviour
 
     private bool _stopSpawning = false;
 
-    // Start is called before the first frame update
-    void Start()
+    private WaitForSeconds _waitBeforeSpawning = new WaitForSeconds(3f);
+    public void StartSpawning()
     {
-        if (_enemyPrefab == null)
-        {
-            Debug.LogError("The Enemy prefab is NULL!");
-        }
-
         StartCoroutine(SpawnEnemyRoutine());
         StartCoroutine(SpawnPowerupRoutine());
     }
 
+
     IEnumerator SpawnEnemyRoutine()
     {
-        yield return new WaitForSeconds(2f);
+        yield return _waitBeforeSpawning;
 
         while (!_stopSpawning)
         {
@@ -45,7 +41,7 @@ public class SpawnManager : MonoBehaviour
 
     IEnumerator SpawnPowerupRoutine()
     {
-        yield return new WaitForSeconds(2f);
+        yield return _waitBeforeSpawning;
 
         while (!_stopSpawning)
         {
