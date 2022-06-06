@@ -5,6 +5,7 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     private float _speed = 3.5f;
+    private float _deathSpeed = 0.75f;
 
     private float _xLeftBound = -9.2f;
     private float _xRightBound = 9.2f;
@@ -12,7 +13,7 @@ public class Enemy : MonoBehaviour
     private float _yUpperBound = 8f;
 
     private Player _player;
-
+    
     private Animator _anim;
 
     // Start is called before the first frame update
@@ -68,9 +69,7 @@ public class Enemy : MonoBehaviour
                 player.Damage();
             }
 
-            _anim.SetTrigger("OnEnemyDeath");
-            _speed = 0;
-            Destroy(this.gameObject, 2.8f);
+            OnEnemyDeath();
         }
 
         if (collision.CompareTag("Laser"))
@@ -79,9 +78,14 @@ public class Enemy : MonoBehaviour
 
             _player.AddPoints(10);
 
-            _anim.SetTrigger("OnEnemyDeath");
-            _speed = 0;
-            Destroy(this.gameObject, 2.8f);
+            OnEnemyDeath();
         }
+    }
+
+    private void OnEnemyDeath()
+    {
+        _anim.SetTrigger("OnEnemyDeath");
+        _speed = _deathSpeed;
+        Destroy(this.gameObject, 2.8f);
     }
 }

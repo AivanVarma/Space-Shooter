@@ -29,7 +29,6 @@ public class Player : MonoBehaviour
 
     [SerializeField]
     private GameObject _tripleShotPrefab;
-    [SerializeField]
     private bool _isTripleShotActive = false;
 
     private float _speedBoost = 1f;
@@ -42,6 +41,9 @@ public class Player : MonoBehaviour
 
     [SerializeField]
     private GameObject[] _engineDamage;
+
+    [SerializeField]
+    private GameObject[] _thrusters;
 
     // Start is called before the first frame update
     void Start()
@@ -145,15 +147,18 @@ public class Player : MonoBehaviour
                 if (!_engineDamage[0].activeSelf)
                 {
                     _engineDamage[0].SetActive(true);
+                    _thrusters[0].SetActive(false);
                 }
                 else
                 {
                     _engineDamage[1].SetActive(true);
+                    _thrusters[1].SetActive(false);
                 }
                 break;
             case 2:
                 int engine = Random.Range(0, 2);
                 _engineDamage[engine].SetActive(true);
+                _thrusters[engine].SetActive(false);
                 break;
         }
     }
