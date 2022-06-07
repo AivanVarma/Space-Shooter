@@ -13,10 +13,10 @@ public class Player : MonoBehaviour
     private int _lives = 3;
     private int _score = 0;
 
-    private float _xLeftBound = -9.2f;
-    private float _xRightBound = 9.2f;
-    private float _yBottomBound = -4f;
-    private float _yUpperBound = 6f;
+    private float _xLeftBound = -9.47f;
+    private float _xRightBound = 9.47f;
+    private float _yBottomBound = -3.71f;
+    private float _yUpperBound = 5.79f;
 
     [SerializeField]
     private GameObject _laserPrefab;
