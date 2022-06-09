@@ -45,6 +45,14 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject[] _thrusters;
 
+    private AudioSource _audioSource;
+    [SerializeField]
+    private AudioClip _laserSoundClip;
+
+    [SerializeField]
+    private GameObject _explosionPrefab;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -57,6 +65,8 @@ public class Player : MonoBehaviour
 
         _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
 
+        _audioSource = this.GetComponent<AudioSource>();
+
         if (_spawnManager == null)
         {
             Debug.LogError("The Spawn Manager is NULL!");
@@ -67,14 +77,9 @@ public class Player : MonoBehaviour
             Debug.LogError("The UI Manager is NULL!");
         }
 
-        if (_laserPrefab == null)
+        if (_audioSource == null)
         {
-            Debug.LogError("The Laser prefab is NULL!");
-        }
-
-        if (_tripleShotPrefab == null)
-        {
-            Debug.LogError("The Triple Shot prefab is NULL!");
+            Debug.LogError("The Audio Source is NULL!");
         }
     }
 
@@ -112,6 +117,9 @@ public class Player : MonoBehaviour
         {
             Instantiate(_laserPrefab, transform.position + _offset, Quaternion.identity);
         }
+
+        _audioSource.clip = _laserSoundClip;
+        _audioSource.Play();
         
         _canFire = Time.time + _fireRate;
     }
@@ -134,6 +142,8 @@ public class Player : MonoBehaviour
         if (_lives < 1)
         {
             _spawnManager.OnPlayerDeath();
+
+            Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
 
             Destroy(this.gameObject);
         }

@@ -14,6 +14,10 @@ public class Powerup : MonoBehaviour
     [SerializeField] // Triple shot = 0, Speed = 1, Shield = 2 
     private int _powerupID;
 
+    [SerializeField]
+    private AudioClip _powerupSoundClip;
+    private float _zSoundClipOffset = -10;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -41,6 +45,10 @@ public class Powerup : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             Player player = collision.transform.GetComponent<Player>();
+
+            Vector3 soundClipPosition = new Vector3(transform.position.x, transform.position.y, _zSoundClipOffset);
+
+            AudioSource.PlayClipAtPoint(_powerupSoundClip, soundClipPosition);
 
             if (player != null)
             {
