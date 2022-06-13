@@ -65,7 +65,7 @@ public class Player : MonoBehaviour
 
         _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
 
-        _audioSource = this.GetComponent<AudioSource>();
+        _audioSource = GetComponent<AudioSource>();
 
         if (_spawnManager == null)
         {
