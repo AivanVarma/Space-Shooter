@@ -49,7 +49,7 @@ public class UIManager : MonoBehaviour
     {
         if (lives < 1)
         {
-            _livesImage.sprite = _livesSprites[lives];
+            _livesImage.sprite = _livesSprites[0];
             GameOverSequence();
         }
         else

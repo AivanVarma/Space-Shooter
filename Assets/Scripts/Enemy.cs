@@ -120,6 +120,7 @@ public class Enemy : MonoBehaviour
 
         _anim.SetTrigger("OnEnemyDeath");
         _speed = _deathSpeed;
+        _canFire = Time.time + 5f;
 
         _audioSource.Play();
 

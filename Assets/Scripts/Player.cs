@@ -38,6 +38,11 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject _shields;
     private bool _isShieldActive = false;
+    private int _shieldHealth = 3;
+    [SerializeField]
+    private SpriteRenderer _shieldRenderer;
+    private float[] _shieldAChannel = new float[4] { 0f, 0.02f, 0.4f, 1f }; // 0 health, 1 health, 2 health, 3 health
+    private Color _shieldColor;
 
     [SerializeField]
     private GameObject[] _engineDamage;
@@ -66,6 +71,8 @@ public class Player : MonoBehaviour
         _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
 
         _audioSource = GetComponent<AudioSource>();
+
+        _shieldColor = _shieldRenderer.color;
 
         if (_spawnManager == null)
         {
@@ -120,7 +127,7 @@ public class Player : MonoBehaviour
 
         _audioSource.clip = _laserSoundClip;
         _audioSource.Play();
-        
+
         _canFire = Time.time + _fireRate;
     }
 
@@ -128,8 +135,7 @@ public class Player : MonoBehaviour
     {
         if (_isShieldActive)
         {
-            _isShieldActive = false;
-            _shields.SetActive(_isShieldActive);
+            ShieldDamage();
             return;
         }
 
@@ -147,6 +153,20 @@ public class Player : MonoBehaviour
 
             Destroy(this.gameObject);
         }
+    }
+
+    private void ShieldDamage()
+    {
+        _shieldHealth--;
+
+        if (_shieldHealth == 0)
+        {
+            _isShieldActive = false;
+            _shields.SetActive(_isShieldActive);
+        }
+
+        _shieldColor.a = _shieldAChannel[_shieldHealth];
+        _shieldRenderer.color = _shieldColor;
     }
 
     private void EngineDamage()
@@ -187,11 +207,15 @@ public class Player : MonoBehaviour
 
     public void ShieldsActive()
     {
+        _shieldHealth = 3;
+        _shieldColor.a = _shieldAChannel[_shieldHealth];
+        _shieldRenderer.color = _shieldColor;
+
         _isShieldActive = true;
         _shields.SetActive(_isShieldActive);
     }
 
-    public void AddPoints (int points)
+    public void AddPoints(int points)
     {
         _score += points;
 
