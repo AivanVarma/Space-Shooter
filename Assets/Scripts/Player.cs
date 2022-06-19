@@ -6,6 +6,7 @@ public class Player : MonoBehaviour
 {
     private SpawnManager _spawnManager;
     private UIManager _uiManager;
+    private MainCamera _mainCamera;
 
     private Vector3 _startingPosition = new Vector3(0, 0, 0);
 
@@ -70,6 +71,8 @@ public class Player : MonoBehaviour
 
         _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
 
+        _mainCamera = GameObject.Find("Main Camera").GetComponent<MainCamera>();
+
         _audioSource = GetComponent<AudioSource>();
 
         _shieldColor = _shieldRenderer.color;
@@ -82,6 +85,11 @@ public class Player : MonoBehaviour
         if (_uiManager == null)
         {
             Debug.LogError("The UI Manager is NULL!");
+        }
+
+        if (_mainCamera == null)
+        {
+            Debug.LogError("The Main Camera is NULL!");
         }
 
         if (_audioSource == null)
@@ -144,6 +152,8 @@ public class Player : MonoBehaviour
         EngineDamage();
 
         _uiManager.UpdateLives(_lives);
+
+        _mainCamera.PlayerDamageShake();
 
         if (_lives < 1)
         {
