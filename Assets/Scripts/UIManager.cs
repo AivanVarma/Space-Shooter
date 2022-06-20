@@ -21,6 +21,9 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Sprite[] _livesSprites;
 
+    [SerializeField]
+    private Slider _thrusterSlider;
+
     private GameManager _gameManager;
 
     private WaitForSeconds _flicker = new WaitForSeconds(0.5f);
@@ -56,6 +59,22 @@ public class UIManager : MonoBehaviour
         {
             _livesImage.sprite = _livesSprites[lives];
         }      
+    }
+
+    public void UpdateThrusterUI(float value)
+    {
+        if (value < 0)
+        {
+            _thrusterSlider.value = 0;
+        }
+        else if (value > 1)
+        {
+            _thrusterSlider.value = 1;
+        }
+        else
+        {
+            _thrusterSlider.value = value;
+        }
     }
 
     private void GameOverSequence()

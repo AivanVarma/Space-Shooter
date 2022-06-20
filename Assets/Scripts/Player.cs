@@ -35,12 +35,7 @@ public class Player : MonoBehaviour
     private float _speedBoost = 1f;
     private float _speedBoostBaseCoefficient = 1f;
     private float _speedBoostCoefficient = 3f;
-    private float _thrustersBoost = 2f;
-    [SerializeField]
-    private GameObject[] _thursters;
-    private Color _thrusterOriginalColor;
-    private Color _thrusterColor;
-
+    
     [SerializeField]
     private GameObject _shields;
     private bool _isShieldActive = false;
@@ -55,6 +50,14 @@ public class Player : MonoBehaviour
 
     [SerializeField]
     private GameObject[] _thrusters;
+    private float _thrustersBoost = 2f;
+    private Color _thrusterOriginalColor;
+    private Color _thrusterColor;
+    private float _thrusterValue = 1f;
+    private float _thrusterUpdateInterval = 0.05f;
+    private float _thrusterValueIncrement = 0.01f;
+    private float _thrusterUpdate = -1f;
+    private bool _thrusterOffline = false;
 
     private AudioSource _audioSource;
     [SerializeField]
@@ -124,23 +127,20 @@ public class Player : MonoBehaviour
 
         Vector3 direction = new Vector3(horizontalInput, verticalInput, 0).normalized;
 
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (Input.GetKey(KeyCode.LeftShift) && !_thrusterOffline)
         {
-            foreach(var thruster in _thrusters)
-            {
-                thruster.GetComponent<SpriteRenderer>().color = _thrusterColor;
-            }
-
             transform.Translate(_thrustersBoost * _speedBoost * _speed * Time.deltaTime * direction);
+
+            ThrustersOn(true);
         }
         else
         {
-            foreach(var thruster in _thrusters)
-            {
-                thruster.GetComponent<SpriteRenderer>().color = _thrusterOriginalColor;
-            }
-
             transform.Translate(_speedBoost * _speed * Time.deltaTime * direction);
+
+            if (_thrusterValue < 1)
+            {
+                ThrustersOn(false);
+            }
         }
 
         transform.position = new Vector3(Mathf.Clamp(transform.position.x, _xLeftBound, _xRightBound), transform.position.y, 0);
@@ -225,6 +225,43 @@ public class Player : MonoBehaviour
                 _engineDamage[engine].SetActive(true);
                 _thrusters[engine].SetActive(false);
                 break;
+        }
+    }
+    private void ThrustersOn(bool online)
+    {
+        if (Time.time > _thrusterUpdate)
+        {
+            if (online)
+            {
+                foreach (var thruster in _thrusters)
+                {
+                    thruster.GetComponent<SpriteRenderer>().color = _thrusterColor;
+                }
+
+                _thrusterValue -= _thrusterValueIncrement;
+
+                if (_thrusterValue < 0)
+                {
+                    _thrusterOffline = true;
+                }
+            }
+            else
+            {
+                foreach (var thruster in _thrusters)
+                {
+                    thruster.GetComponent<SpriteRenderer>().color = _thrusterOriginalColor;
+                }
+
+                _thrusterValue += _thrusterValueIncrement;
+
+                if (Mathf.Approximately(1f, _thrusterValue))
+                {
+                    _thrusterOffline = false;
+                }
+            }
+
+            _uiManager.UpdateThrusterUI(_thrusterValue);
+            _thrusterUpdate = Time.time + _thrusterUpdateInterval;
         }
     }
 
