@@ -35,6 +35,11 @@ public class Player : MonoBehaviour
     private float _speedBoost = 1f;
     private float _speedBoostBaseCoefficient = 1f;
     private float _speedBoostCoefficient = 3f;
+    private float _thrustersBoost = 2f;
+    [SerializeField]
+    private GameObject[] _thursters;
+    private Color _thrusterOriginalColor;
+    private Color _thrusterColor;
 
     [SerializeField]
     private GameObject _shields;
@@ -77,6 +82,9 @@ public class Player : MonoBehaviour
 
         _shieldColor = _shieldRenderer.color;
 
+        _thrusterOriginalColor = _thrusters[0].GetComponent<SpriteRenderer>().color;
+        _thrusterColor = new Color(255, 0, 200, 255);
+
         if (_spawnManager == null)
         {
             Debug.LogError("The Spawn Manager is NULL!");
@@ -116,7 +124,24 @@ public class Player : MonoBehaviour
 
         Vector3 direction = new Vector3(horizontalInput, verticalInput, 0).normalized;
 
-        transform.Translate(_speedBoost * _speed * Time.deltaTime * direction);
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            foreach(var thruster in _thrusters)
+            {
+                thruster.GetComponent<SpriteRenderer>().color = _thrusterColor;
+            }
+
+            transform.Translate(_thrustersBoost * _speedBoost * _speed * Time.deltaTime * direction);
+        }
+        else
+        {
+            foreach(var thruster in _thrusters)
+            {
+                thruster.GetComponent<SpriteRenderer>().color = _thrusterOriginalColor;
+            }
+
+            transform.Translate(_speedBoost * _speed * Time.deltaTime * direction);
+        }
 
         transform.position = new Vector3(Mathf.Clamp(transform.position.x, _xLeftBound, _xRightBound), transform.position.y, 0);
         transform.position = new Vector3(transform.position.x, Mathf.Clamp(transform.position.y, _yBottomBound, _yUpperBound), 0);
