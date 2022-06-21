@@ -45,7 +45,7 @@ public class SpawnManager : MonoBehaviour
 
         while (!_stopSpawning)
         {
-            int randomPowerup = Random.Range(0, 3);
+            int randomPowerup = Random.Range(0, _powerups.Length);
 
             Instantiate(_powerups[randomPowerup]);
 

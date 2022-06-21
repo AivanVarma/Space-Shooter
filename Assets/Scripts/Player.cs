@@ -66,6 +66,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject _explosionPrefab;
 
+    private int _pointsFromExtraLife = 500;
+
 
     // Start is called before the first frame update
     void Start()
@@ -285,6 +287,30 @@ public class Player : MonoBehaviour
 
         _isShieldActive = true;
         _shields.SetActive(_isShieldActive);
+    }
+
+    public void LifeCollected()
+    {
+        if (_lives == 3)
+        {
+            AddPoints(_pointsFromExtraLife);
+        }
+        else
+        {
+            _lives++;
+            _uiManager.UpdateLives(_lives);
+
+            if (_engineDamage[0].activeSelf)
+            {
+                _engineDamage[0].SetActive(false);
+                _thrusters[0].SetActive(true);
+            }
+            else
+            {
+                _engineDamage[1].SetActive(false);
+                _thrusters[1].SetActive(true);
+            }
+        }
     }
 
     public void AddPoints(int points)
