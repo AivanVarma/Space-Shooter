@@ -68,6 +68,9 @@ public class Player : MonoBehaviour
 
     private int _pointsFromExtraLife = 500;
 
+    private int _maxAmmo = 15;
+    private int _ammoCount;
+
 
     // Start is called before the first frame update
     void Start()
@@ -90,6 +93,8 @@ public class Player : MonoBehaviour
         _thrusterOriginalColor = _thrusters[0].GetComponent<SpriteRenderer>().color;
         _thrusterColor = new Color(255, 0, 200, 255);
 
+        _ammoCount = _maxAmmo;
+
         if (_spawnManager == null)
         {
             Debug.LogError("The Spawn Manager is NULL!");
@@ -109,6 +114,9 @@ public class Player : MonoBehaviour
         {
             Debug.LogError("The Audio Source is NULL!");
         }
+
+        _uiManager.UpdateScore(_score);
+        _uiManager.UpdateAmmoCount(_ammoCount, _maxAmmo);
     }
 
     // Update is called once per frame
@@ -116,7 +124,7 @@ public class Player : MonoBehaviour
     {
         Movement();
 
-        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)
+        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire && _ammoCount > 0)
         {
             FireLaser();
         }
@@ -151,6 +159,10 @@ public class Player : MonoBehaviour
 
     private void FireLaser()
     {
+        _ammoCount--;
+
+        _uiManager.UpdateAmmoCount(_ammoCount, _maxAmmo);
+
         if (_isTripleShotActive)
         {
             Instantiate(_tripleShotPrefab, transform.position, Quaternion.identity);

@@ -1,19 +1,21 @@
 using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class UIManager : MonoBehaviour
 {
     [SerializeField]
     private TMP_Text _scoreText;
 
-   [SerializeField]
+    [SerializeField]
     private TMP_Text _gameOverText;
 
     [SerializeField]
     private TMP_Text _restartText;
+
+    [SerializeField]
+    private TMP_Text _ammoCountText;
 
     [SerializeField]
     private Image _livesImage;
@@ -31,7 +33,6 @@ public class UIManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _scoreText.text = "Score: " + 0;
         _gameOverText.gameObject.SetActive(false);
         _restartText.gameObject.SetActive(false);
 
@@ -58,7 +59,7 @@ public class UIManager : MonoBehaviour
         else
         {
             _livesImage.sprite = _livesSprites[lives];
-        }      
+        }
     }
 
     public void UpdateThrusterUI(float value)
@@ -75,6 +76,11 @@ public class UIManager : MonoBehaviour
         {
             _thrusterSlider.value = value;
         }
+    }
+
+    public void UpdateAmmoCount(int ammo, int maxAmmo)
+    {
+        _ammoCountText.text = "Ammo: " + ammo + "/" + maxAmmo;
     }
 
     private void GameOverSequence()
