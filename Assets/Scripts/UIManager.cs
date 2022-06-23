@@ -80,7 +80,7 @@ public class UIManager : MonoBehaviour
 
     public void UpdateAmmoCount(int ammo, int maxAmmo)
     {
-        _ammoCountText.text = "Ammo: " + ammo + "/" + maxAmmo;
+        _ammoCountText.text = ammo + "/" + maxAmmo;
     }
 
     private void GameOverSequence()

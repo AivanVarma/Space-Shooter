@@ -70,7 +70,7 @@ public class Player : MonoBehaviour
 
     private int _maxAmmo = 15;
     private int _ammoCount;
-
+    private int _pointsWhenAmmoFull = 100;
 
     // Start is called before the first frame update
     void Start()
@@ -322,6 +322,19 @@ public class Player : MonoBehaviour
                 _engineDamage[1].SetActive(false);
                 _thrusters[1].SetActive(true);
             }
+        }
+    }
+
+    public void AmmoCollected()
+    {
+        if (_ammoCount < _maxAmmo)
+        {
+            _ammoCount = _maxAmmo;
+            _uiManager.UpdateAmmoCount(_ammoCount,_maxAmmo);
+        }
+        else
+        {
+            AddPoints(_pointsWhenAmmoFull);
         }
     }
 
