@@ -1151,6 +1151,7 @@ MonoBehaviour:
   - {fileID: 384781041}
   _laserSoundClip: {fileID: 8300000, guid: 75676f361bdfeaf41a46623e95df3dbc, type: 3}
   _explosionPrefab: {fileID: 1021931465786549713, guid: 739c60ef2ea6e40409730a7fa6ae231a, type: 3}
+  _scatterShotPrefab: {fileID: 8637084450443826057, guid: 8d5cccef864a88d42b742bd50cb3c1f0, type: 3}
 --- !u!212 &718095325
 SpriteRenderer:
   m_ObjectHideFlags: 0

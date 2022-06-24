@@ -11,7 +11,7 @@ public class Powerup : MonoBehaviour
     
     private float _speed = 3f;
 
-    [SerializeField] // Triple shot = 0, Speed = 1, Shield = 2, Health = 3, Ammo = 4
+    [SerializeField] // Triple shot = 0, Speed = 1, Shield = 2, Health = 3, Ammo = 4, Scatter shot = 5
     private int _powerupID;
 
     [SerializeField]
@@ -68,6 +68,9 @@ public class Powerup : MonoBehaviour
                         break;
                     case 4:
                         player.AmmoCollected();
+                        break;
+                    case 5:
+                        player.ScatterShotActive();
                         break;
                     default:
                         Debug.Log("Powerup ID not found!");

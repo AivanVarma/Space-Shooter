@@ -72,6 +72,10 @@ public class Player : MonoBehaviour
     private int _ammoCount;
     private int _pointsWhenAmmoFull = 100;
 
+    [SerializeField]
+    private GameObject _scatterShotPrefab;
+    private bool _isScatterShotActive = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -166,6 +170,10 @@ public class Player : MonoBehaviour
         if (_isTripleShotActive)
         {
             Instantiate(_tripleShotPrefab, transform.position, Quaternion.identity);
+        }
+        if (_isScatterShotActive)
+        {
+            Instantiate(_scatterShotPrefab, transform.position + _offset, Quaternion.identity);
         }
         else
         {
@@ -345,16 +353,31 @@ public class Player : MonoBehaviour
         _uiManager.UpdateScore(_score);
     }
 
+    public void ScatterShotActive()
+    {
+        _isScatterShotActive = true;
+
+        StartCoroutine(ScatterShotPowerDownRoutine());
+    }
+
     IEnumerator TripleShotPowerDownRoutine()
     {
         yield return _powerupWaitTime;
 
         _isTripleShotActive = false;
     }
+
     IEnumerator SpeedBoostPowerDownRoutine()
     {
         yield return _powerupWaitTime;
 
         _speedBoost = _speedBoostBaseCoefficient;
+    }
+
+    IEnumerator ScatterShotPowerDownRoutine()
+    {
+        yield return _powerupWaitTime;
+
+        _isScatterShotActive = false;
     }
 }
