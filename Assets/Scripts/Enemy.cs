@@ -11,16 +11,16 @@ public class Enemy : MonoBehaviour
     private float _xRightBound = 9.2f;
     private float _yBottomBound = -6f;
     private float _yUpperBound = 8f;
+    private float _xOffset = 2f;
 
     private Player _player;
-    
+
     private Animator _anim;
 
     private AudioSource _audioSource;
 
     [SerializeField]
     private GameObject _enemyLaserPrefab;
-    private float _laserOffset = -0.7f;
     [SerializeField]
     private float _canFire = 1f;
     private float _minimumFireRate = 3f;
@@ -29,7 +29,7 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        transform.position = RandomXPosition();
+        transform.position = RandomSpawnPosition();
 
         _player = GameObject.Find("Player").GetComponent<Player>();
 
@@ -64,19 +64,34 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private Vector3 RandomXPosition()
+    private Vector3 RandomSpawnPosition()
     {
-        float xRandom = Random.Range(_xLeftBound, _xRightBound);
-        return new Vector3(xRandom, _yUpperBound, 0);
+        
+        float xPosition = Random.Range(_xLeftBound, _xRightBound);
+        float yPosition = _yUpperBound;
+
+        if (transform.rotation.z < 0f)
+        {
+            xPosition = _xRightBound + _xOffset;
+            yPosition = Random.Range(0f, _yUpperBound);
+        }
+        else if (transform.rotation.z > 0f)
+        {
+            xPosition = _xLeftBound - _xOffset;
+            yPosition = Random.Range(0f, _yUpperBound);
+        }
+
+        return new Vector3(xPosition, yPosition, 0f);
+
     }
 
     private void Movement()
     {
         transform.Translate(_speed * Time.deltaTime * Vector3.down);
 
-        if (transform.position.y < _yBottomBound)
+        if (transform.position.y < _yBottomBound || transform.position.x > _xRightBound + _xOffset || transform.position.x < _xLeftBound - _xOffset)
         {
-            transform.position = RandomXPosition();
+            transform.position = RandomSpawnPosition();
         }
     }
 
@@ -85,8 +100,7 @@ public class Enemy : MonoBehaviour
         float randomFireRate = Random.Range(_minimumFireRate, _maximumFireRate);
         _canFire = Time.time + randomFireRate;
 
-        Vector3 position = new Vector3(transform.position.x, transform.position.y + _laserOffset, transform.position.z);
-        GameObject laser = Instantiate(_enemyLaserPrefab, position, Quaternion.identity);
+        GameObject laser = Instantiate(_enemyLaserPrefab, transform.position, transform.rotation);
         laser.GetComponent<Laser>().AssignEnemyLaser();
     }
 
@@ -105,7 +119,7 @@ public class Enemy : MonoBehaviour
         }
 
         if (collision.CompareTag("Laser"))
-        {            
+        {
             Destroy(collision.gameObject);
 
             _player.AddPoints(10);

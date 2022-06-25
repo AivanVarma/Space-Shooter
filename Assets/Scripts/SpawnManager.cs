@@ -7,18 +7,22 @@ public class SpawnManager : MonoBehaviour
     [SerializeField]
     private GameObject _enemyPrefab;
     private float _spawnInterval = 1f;
+    [SerializeField]
+    private GameObject _enemyContainer;
+    private int _rotationOption = 0;
+    private int _maxRotationOptions = 3;
+    private float _minDeg = -90f;
+    private float _maxDeg = 90f;
 
     [SerializeField]
     private GameObject[] _powerups;
     private float _minSpawnTime = 3f;
     private float _maxSpawnTime = 7f;
 
-    [SerializeField]
-    private GameObject _enemyContainer;
-
     private bool _stopSpawning = false;
 
     private WaitForSeconds _waitBeforeSpawning = new WaitForSeconds(3f);
+
     public void StartSpawning()
     {
         StartCoroutine(SpawnEnemyRoutine());
@@ -30,9 +34,29 @@ public class SpawnManager : MonoBehaviour
     {
         yield return _waitBeforeSpawning;
 
+        float randomDeg;
+
+        GameObject newEnemy = null;
+
         while (!_stopSpawning)
         {
-            GameObject newEnemy = Instantiate(_enemyPrefab);
+            _rotationOption = Random.Range(0, _maxRotationOptions);
+
+            if (_rotationOption == 0)
+            {
+                newEnemy = Instantiate(_enemyPrefab, transform.position, Quaternion.identity);
+            }
+            else if (_rotationOption == 1)
+            {
+                randomDeg = Random.Range(_minDeg, 0);
+                newEnemy = Instantiate(_enemyPrefab, transform.position, Quaternion.Euler(0, 0, randomDeg));
+            }
+            else if (_rotationOption == 2)
+            {
+                randomDeg = Random.Range(0, _maxDeg);
+                newEnemy = Instantiate(_enemyPrefab, transform.position, Quaternion.Euler(0, 0, randomDeg));
+            }
+
             newEnemy.transform.parent = _enemyContainer.transform;
 
             yield return new WaitForSeconds(_spawnInterval);

@@ -194,7 +194,7 @@ public class Player : MonoBehaviour
             return;
         }
 
-        _lives--;
+        //_lives--;
 
         EngineDamage();
 
