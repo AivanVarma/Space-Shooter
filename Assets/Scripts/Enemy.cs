@@ -21,10 +21,12 @@ public class Enemy : MonoBehaviour
 
     [SerializeField]
     private GameObject _enemyLaserPrefab;
-    [SerializeField]
     private float _canFire = 1f;
     private float _minimumFireRate = 3f;
     private float _maximumFireRate = 6f;
+
+    [SerializeField]
+    private GameObject _enemyShields;
 
     // Start is called before the first frame update
     void Start()
@@ -64,9 +66,14 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    public void ActivateShields()
+    {
+        _enemyShields.SetActive(true);
+    }
+
     private Vector3 RandomSpawnPosition()
     {
-        
+
         float xPosition = Random.Range(_xLeftBound, _xRightBound);
         float yPosition = _yUpperBound;
 
@@ -122,7 +129,11 @@ public class Enemy : MonoBehaviour
         {
             Destroy(collision.gameObject);
 
-            _player.AddPoints(10);
+            if (!_enemyShields.activeSelf)
+            {
+                _player.AddPoints(10);
+            }
+
 
             OnEnemyDeath();
         }
@@ -130,6 +141,12 @@ public class Enemy : MonoBehaviour
 
     private void OnEnemyDeath()
     {
+        if (_enemyShields.activeSelf)
+        {
+            _enemyShields.SetActive(false);
+            return;
+        }
+
         Destroy(GetComponent<Collider2D>());
 
         _anim.SetTrigger("OnEnemyDeath");

@@ -35,6 +35,7 @@ public class SpawnManager : MonoBehaviour
         yield return _waitBeforeSpawning;
 
         float randomDeg;
+        int randomShield;
 
         GameObject newEnemy = null;
 
@@ -55,6 +56,13 @@ public class SpawnManager : MonoBehaviour
             {
                 randomDeg = Random.Range(0, _maxDeg);
                 newEnemy = Instantiate(_enemyPrefab, transform.position, Quaternion.Euler(0, 0, randomDeg));
+            }
+
+            randomShield = Random.Range(0, 100);
+
+            if (randomShield < 33)
+            {
+                newEnemy.GetComponent<Enemy>().ActivateShields();
             }
 
             newEnemy.transform.parent = _enemyContainer.transform;
