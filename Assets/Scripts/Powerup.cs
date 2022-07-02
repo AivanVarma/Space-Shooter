@@ -11,7 +11,7 @@ public class Powerup : MonoBehaviour
     
     private float _speed = 3f;
 
-    [SerializeField] // Triple shot = 0, Speed = 1, Shield = 2, Health = 3, Ammo = 4, Scatter shot = 5
+    [SerializeField] // Triple shot = 0, Speed = 1, Shield = 2, Health = 3, Ammo = 4, Scatter shot = 5, Negative Speed = 6
     private int _powerupID;
 
     [SerializeField]
@@ -21,13 +21,13 @@ public class Powerup : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        transform.position = new Vector3(Random.Range(_xLeftBound, _xRightBound), _yUpperBound, 0);
+        //transform.position = new Vector3(Random.Range(_xLeftBound, _xRightBound), _yUpperBound, 0);
     }
 
     // Update is called once per frame
     void Update()
     {
-        Movement();
+        //Movement();
     }
 
     private void Movement()
@@ -71,6 +71,9 @@ public class Powerup : MonoBehaviour
                         break;
                     case 5:
                         player.ScatterShotActive();
+                        break;
+                    case 6:
+                        player.NegativeSpeedBoostActive();
                         break;
                     default:
                         Debug.Log("Powerup ID not found!");

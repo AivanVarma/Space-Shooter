@@ -35,6 +35,7 @@ public class Player : MonoBehaviour
     private float _speedBoost = 1f;
     private float _speedBoostBaseCoefficient = 1f;
     private float _speedBoostCoefficient = 3f;
+    private float _negativeSpeedBoostCoefficient = 0.5f;
     
     [SerializeField]
     private GameObject _shields;
@@ -296,6 +297,12 @@ public class Player : MonoBehaviour
     public void SpeedBoostActive()
     {
         _speedBoost = _speedBoostCoefficient;
+        StartCoroutine(SpeedBoostPowerDownRoutine());
+    }
+
+    public void NegativeSpeedBoostActive()
+    {
+        _speedBoost = _negativeSpeedBoostCoefficient;
         StartCoroutine(SpeedBoostPowerDownRoutine());
     }
 

@@ -2146,6 +2146,8 @@ MonoBehaviour:
   - {fileID: 2216824695117045332, guid: 75f0a20ba1b618f4ba914efcd67c317a, type: 3}
   - {fileID: 6890437962179765508, guid: f9618532a781af148b6941f34333a1e5, type: 3}
   - {fileID: 1150179632281991940, guid: 9a75762bd1c36044db02343df8821f4a, type: 3}
+  - {fileID: 16506453963127260, guid: 747dc3d3728fc9b47afadc1229a9f023, type: 3}
+  - {fileID: 7081650440485228, guid: 0ca4e4c66b08d364ca1f65ce47872372, type: 3}
 --- !u!4 &1600391311
 Transform:
   m_ObjectHideFlags: 0
@@ -2902,7 +2904,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8113707887079041763, guid: 895685ee749f9b749af622cda9dd1ee6, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 895685ee749f9b749af622cda9dd1ee6, type: 3}
