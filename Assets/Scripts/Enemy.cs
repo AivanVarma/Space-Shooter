@@ -28,10 +28,12 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     private GameObject _enemyShields;
 
+    private bool _powerupDetected = false;
+
     // Start is called before the first frame update
     void Start()
     {
-        transform.position = RandomSpawnPosition();
+        //transform.position = RandomSpawnPosition();
 
         _player = GameObject.Find("Player").GetComponent<Player>();
 
@@ -63,6 +65,12 @@ public class Enemy : MonoBehaviour
         if (Time.time > _canFire)
         {
             FireLaser();
+        }
+
+        if (_powerupDetected)
+        {
+            FireLaser();
+            _powerupDetected = false;
         }
     }
 
@@ -104,8 +112,11 @@ public class Enemy : MonoBehaviour
 
     private void FireLaser()
     {
-        float randomFireRate = Random.Range(_minimumFireRate, _maximumFireRate);
-        _canFire = Time.time + randomFireRate;
+        if (!_powerupDetected)
+        {
+            float randomFireRate = Random.Range(_minimumFireRate, _maximumFireRate);
+            _canFire = Time.time + randomFireRate;
+        }
 
         GameObject laser = Instantiate(_enemyLaserPrefab, transform.position, transform.rotation);
         laser.GetComponent<Laser>().AssignEnemyLaser();
@@ -156,5 +167,10 @@ public class Enemy : MonoBehaviour
         _audioSource.Play();
 
         Destroy(this.gameObject, 2.8f);
+    }
+
+    public void PowerupDetected()
+    {
+        _powerupDetected = true;
     }
 }

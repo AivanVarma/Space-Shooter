@@ -8,7 +8,7 @@ public class Powerup : MonoBehaviour
     private float _xRightBound = 7.2f;
     private float _yBottomBound = -4f;
     private float _yUpperBound = 8f;
-    
+
     private float _speed = 3f;
 
     [SerializeField] // Triple shot = 0, Speed = 1, Shield = 2, Health = 3, Ammo = 4, Scatter shot = 5, Negative Speed = 6
@@ -21,13 +21,13 @@ public class Powerup : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //transform.position = new Vector3(Random.Range(_xLeftBound, _xRightBound), _yUpperBound, 0);
+        transform.position = new Vector3(Random.Range(_xLeftBound, _xRightBound), _yUpperBound, 0);
     }
 
     // Update is called once per frame
     void Update()
     {
-        //Movement();
+        Movement();
     }
 
     private void Movement()
@@ -52,7 +52,7 @@ public class Powerup : MonoBehaviour
 
             if (player != null)
             {
-                switch(_powerupID)
+                switch (_powerupID)
                 {
                     case 0:
                         player.TripleShotActive();
@@ -79,9 +79,9 @@ public class Powerup : MonoBehaviour
                         Debug.Log("Powerup ID not found!");
                         break;
                 }
-                
+
             }
-            
+
             Destroy(this.gameObject);
         }
     }
