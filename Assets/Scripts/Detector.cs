@@ -26,7 +26,14 @@ public class Detector : MonoBehaviour
 
         if (collision.CompareTag("Player"))
         {
-            _enemy.RamPlayer(collision.transform.position);
+            if (transform.CompareTag("PlayerBehind"))
+            {
+                _enemy.PlayerBehind();
+            }
+            else
+            {
+                _enemy.RamPlayer(collision.transform.position);
+            }      
         }
     }
 

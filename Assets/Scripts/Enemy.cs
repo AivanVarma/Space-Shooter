@@ -6,6 +6,7 @@ public class Enemy : MonoBehaviour
 {
     private float _speed = 3.5f;
     private float _deathSpeed = 0.75f;
+    private bool _isDead = false;
 
     private float _xLeftBound = -9.2f;
     private float _xRightBound = 9.2f;
@@ -34,10 +35,12 @@ public class Enemy : MonoBehaviour
     private Vector3 _rammingDirection;
     private float _rammingSpeed = 5f;
 
+    private bool _playerBehind = false;
+
     // Start is called before the first frame update
     void Start()
     {
-        //transform.position = RandomSpawnPosition();
+        transform.position = RandomSpawnPosition();
 
         _player = GameObject.Find("Player").GetComponent<Player>();
 
@@ -70,12 +73,6 @@ public class Enemy : MonoBehaviour
         {
             FireLaser();
         }
-
-        if (_powerupDetected)
-        {
-            FireLaser();
-            _powerupDetected = false;
-        }
     }
 
     public void ActivateShields()
@@ -106,7 +103,7 @@ public class Enemy : MonoBehaviour
 
     private void Movement()
     {
-        if (_ramPlayer)
+        if (_ramPlayer && !_isDead)
         {
             transform.position = Vector3.MoveTowards(transform.position, _rammingDirection, _rammingSpeed * Time.deltaTime);
         }
@@ -123,13 +120,28 @@ public class Enemy : MonoBehaviour
 
     private void FireLaser()
     {
+        if (_isDead)
+        {
+            return;
+        }
+
+        GameObject laser;
+
         if (!_powerupDetected)
         {
             float randomFireRate = Random.Range(_minimumFireRate, _maximumFireRate);
             _canFire = Time.time + randomFireRate;
         }
 
-        GameObject laser = Instantiate(_enemyLaserPrefab, transform.position, transform.rotation);
+        if (_playerBehind)
+        {
+            laser = Instantiate(_enemyLaserPrefab, transform.position, transform.rotation * Quaternion.Euler(0, 0, 180f));
+        }
+        else
+        {
+            laser = Instantiate(_enemyLaserPrefab, transform.position, transform.rotation);
+        }
+
         laser.GetComponent<Laser>().AssignEnemyLaser();
     }
 
@@ -169,11 +181,12 @@ public class Enemy : MonoBehaviour
             return;
         }
 
+        _isDead = true;
+
         Destroy(GetComponent<Collider2D>());
 
         _anim.SetTrigger("OnEnemyDeath");
         _speed = _deathSpeed;
-        _canFire = Time.time + 5f;
 
         _audioSource.Play();
 
@@ -183,11 +196,20 @@ public class Enemy : MonoBehaviour
     public void PowerupDetected()
     {
         _powerupDetected = true;
+        FireLaser();
+        _powerupDetected = false;
     }
 
     public void RamPlayer(Vector3 rammingDirection)
     {
         _ramPlayer = !_ramPlayer;
         _rammingDirection = rammingDirection;
+    }
+
+    public void PlayerBehind()
+    {
+        _playerBehind = true;
+        FireLaser();
+        _playerBehind = false;
     }
 }

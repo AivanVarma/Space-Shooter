@@ -8,6 +8,7 @@ TagManager:
   - Laser
   - Powerup
   - PowerupCollector
+  - PlayerBehind
   layers:
   - Default
   - TransparentFX
