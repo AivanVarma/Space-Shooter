@@ -30,6 +30,10 @@ public class Enemy : MonoBehaviour
 
     private bool _powerupDetected = false;
 
+    private bool _ramPlayer = false;
+    private Vector3 _rammingDirection;
+    private float _rammingSpeed = 5f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -102,7 +106,14 @@ public class Enemy : MonoBehaviour
 
     private void Movement()
     {
-        transform.Translate(_speed * Time.deltaTime * Vector3.down);
+        if (_ramPlayer)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, _rammingDirection, _rammingSpeed * Time.deltaTime);
+        }
+        else
+        {
+            transform.Translate(_speed * Time.deltaTime * Vector3.down);
+        }
 
         if (transform.position.y < _yBottomBound || transform.position.x > _xRightBound + _xOffset || transform.position.x < _xLeftBound - _xOffset)
         {
@@ -172,5 +183,11 @@ public class Enemy : MonoBehaviour
     public void PowerupDetected()
     {
         _powerupDetected = true;
+    }
+
+    public void RamPlayer(Vector3 rammingDirection)
+    {
+        _ramPlayer = !_ramPlayer;
+        _rammingDirection = rammingDirection;
     }
 }

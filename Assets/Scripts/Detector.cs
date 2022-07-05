@@ -23,5 +23,18 @@ public class Detector : MonoBehaviour
         {
             _enemy.PowerupDetected();
         }
+
+        if (collision.CompareTag("Player"))
+        {
+            _enemy.RamPlayer(collision.transform.position);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+            _enemy.RamPlayer(collision.transform.position);
+        }
     }
 }
