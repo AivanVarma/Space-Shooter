@@ -18,16 +18,35 @@ public class Powerup : MonoBehaviour
     private AudioClip _powerupSoundClip;
     private float _zSoundClipOffset = -10;
 
+    [SerializeField]
+    private bool _inPowerupCollectorZone = false;
+    private Transform _player;
+    private float _collectedSpeed = 10f;
+
     // Start is called before the first frame update
     void Start()
     {
         transform.position = new Vector3(Random.Range(_xLeftBound, _xRightBound), _yUpperBound, 0);
+
+        _player = GameObject.Find("Player").GetComponent<Transform>();
+
+        if (_player == null)
+        {
+            Debug.LogError("Player is NULL!");
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        Movement();
+        if (_inPowerupCollectorZone && Input.GetKey(KeyCode.C))
+        {
+            transform.position = Vector3.MoveTowards(transform.position, _player.position, _collectedSpeed * Time.deltaTime);
+        }
+        else
+        {
+            Movement();
+        }
     }
 
     private void Movement()
@@ -83,6 +102,19 @@ public class Powerup : MonoBehaviour
             }
 
             Destroy(this.gameObject);
+        }
+
+        if (collision.CompareTag("PowerupCollector"))
+        {
+            _inPowerupCollectorZone = true;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("PowerupCollector"))
+        {
+            _inPowerupCollectorZone = false;
         }
     }
 }
