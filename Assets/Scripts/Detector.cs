@@ -19,7 +19,7 @@ public class Detector : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Powerup"))
+        if (collision.CompareTag("Powerup") && transform.CompareTag("DetectPowerup"))
         {
             _enemy.PowerupDetected();
         }
@@ -30,18 +30,28 @@ public class Detector : MonoBehaviour
             {
                 _enemy.PlayerBehind();
             }
-            else
+            else if (transform.CompareTag("RammingArea"))
             {
                 _enemy.RamPlayer(collision.transform.position);
             }      
+        }
+
+        if (collision.CompareTag("Laser") && transform.CompareTag("AvoidShot"))
+        {
+            _enemy.AvoidShot();
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        if (collision.CompareTag("Player") && transform.CompareTag("RammingArea"))
         {
             _enemy.RamPlayer(collision.transform.position);
+        }
+
+        if (collision.CompareTag("Laser") && transform.CompareTag("AvoidShot"))
+        {
+            _enemy.AvoidShot();
         }
     }
 }

@@ -164,7 +164,7 @@ public class Player : MonoBehaviour
 
     private void FireLaser()
     {
-        _ammoCount--;
+        //_ammoCount--;
 
         _uiManager.UpdateAmmoCount(_ammoCount, _maxAmmo);
 

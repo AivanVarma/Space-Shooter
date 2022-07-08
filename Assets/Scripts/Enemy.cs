@@ -13,6 +13,7 @@ public class Enemy : MonoBehaviour
     private float _yBottomBound = -6f;
     private float _yUpperBound = 8f;
     private float _xOffset = 2f;
+    private float _yOffset = 4f;
 
     private Player _player;
 
@@ -36,6 +37,11 @@ public class Enemy : MonoBehaviour
     private float _rammingSpeed = 5f;
 
     private bool _playerBehind = false;
+
+    private bool _avoidShot = false;
+    private Vector3 _evadeDirection;
+    private int _maxEvasionDirection = 10;
+    private float _evasionSpeedBoost = 1.5f;
 
     // Start is called before the first frame update
     void Start()
@@ -107,12 +113,17 @@ public class Enemy : MonoBehaviour
         {
             transform.position = Vector3.MoveTowards(transform.position, _rammingDirection, _rammingSpeed * Time.deltaTime);
         }
+        else if (_avoidShot && !_isDead)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, _evadeDirection, _speed * _evasionSpeedBoost * Time.deltaTime);
+        }
         else
         {
             transform.Translate(_speed * Time.deltaTime * Vector3.down);
         }
 
-        if (transform.position.y < _yBottomBound || transform.position.x > _xRightBound + _xOffset || transform.position.x < _xLeftBound - _xOffset)
+        if (transform.position.y < _yBottomBound || transform.position.y > _yUpperBound + _yOffset ||
+            transform.position.x > _xRightBound + _xOffset || transform.position.x < _xLeftBound - _xOffset)
         {
             transform.position = RandomSpawnPosition();
         }
@@ -211,5 +222,34 @@ public class Enemy : MonoBehaviour
         _playerBehind = true;
         FireLaser();
         _playerBehind = false;
+    }
+
+    public void AvoidShot()
+    {
+        _avoidShot = !_avoidShot;
+
+        int randomDirection = Random.Range(0, _maxEvasionDirection);
+
+        if (transform.rotation.z < 0)
+        {
+            _evadeDirection = new Vector3(-randomDirection, randomDirection, 0);
+        }
+        else if (transform.rotation.z > 0)
+        {
+            _evadeDirection = new Vector3(randomDirection, randomDirection, 0);
+        }
+        else
+        {
+            if (randomDirection % 2 == 0)
+            {
+                _evadeDirection = new Vector3(randomDirection, -randomDirection, 0);
+            }
+            else
+            {
+                _evadeDirection = new Vector3(-randomDirection, -randomDirection, 0);
+            }
+        }
+        
+        _evadeDirection += transform.position;
     }
 }
