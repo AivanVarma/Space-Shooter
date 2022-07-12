@@ -77,6 +77,12 @@ public class Player : MonoBehaviour
     private GameObject _scatterShotPrefab;
     private bool _isScatterShotActive = false;
 
+    [SerializeField]
+    private GameObject _homingMissilePrefab;
+    private int _missileCount = 0;
+    private int _maxMissileCount = 5;
+    private int _pointsWhenMissilesFull = 400;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -122,6 +128,7 @@ public class Player : MonoBehaviour
 
         _uiManager.UpdateScore(_score);
         _uiManager.UpdateAmmoCount(_ammoCount, _maxAmmo);
+        _uiManager.UpdateMissileCount(_missileCount, _maxMissileCount);
     }
 
     // Update is called once per frame
@@ -132,6 +139,11 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire && _ammoCount > 0)
         {
             FireLaser();
+        }
+
+        if (Input.GetKeyDown(KeyCode.E) && _missileCount > 0)
+        {
+            FireMissile();
         }
     }
 
@@ -185,6 +197,14 @@ public class Player : MonoBehaviour
         _audioSource.Play();
 
         _canFire = Time.time + _fireRate;
+    }
+
+    private void FireMissile()
+    {
+        _missileCount--;
+
+        _uiManager.UpdateMissileCount(_missileCount, _maxMissileCount);
+        Instantiate(_homingMissilePrefab, transform.position, Quaternion.identity);
     }
 
     public void Damage()
@@ -351,6 +371,20 @@ public class Player : MonoBehaviour
         {
             AddPoints(_pointsWhenAmmoFull);
         }
+    }
+
+    public void MissilesCollected()
+    {
+        if (_missileCount < _maxMissileCount)
+        {
+            _missileCount = _maxMissileCount;
+            _uiManager.UpdateMissileCount(_missileCount, _maxMissileCount);
+        }
+        else
+        {
+            AddPoints(_pointsWhenMissilesFull);
+        }
+
     }
 
     public void AddPoints(int points)

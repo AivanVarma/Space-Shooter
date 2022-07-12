@@ -46,7 +46,7 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        transform.position = RandomSpawnPosition();
+        //transform.position = RandomSpawnPosition();
 
         _player = GameObject.Find("Player").GetComponent<Player>();
 
@@ -73,7 +73,7 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Movement();
+        //Movement();
 
         if (Time.time > _canFire)
         {
@@ -179,6 +179,13 @@ public class Enemy : MonoBehaviour
                 _player.AddPoints(10);
             }
 
+
+            OnEnemyDeath();
+        }
+
+        if (collision.CompareTag("HomingMissile"))
+        {
+            _player.AddPoints(20);
 
             OnEnemyDeath();
         }

@@ -18,6 +18,9 @@ public class UIManager : MonoBehaviour
     private TMP_Text _ammoCountText;
 
     [SerializeField]
+    private TMP_Text _missileCountText;
+
+    [SerializeField]
     private Image _livesImage;
 
     [SerializeField]
@@ -81,6 +84,11 @@ public class UIManager : MonoBehaviour
     public void UpdateAmmoCount(int ammo, int maxAmmo)
     {
         _ammoCountText.text = ammo + "/" + maxAmmo;
+    }
+
+    public void UpdateMissileCount(int missiles, int maxMissiles)
+    {
+        _missileCountText.text = missiles + "/" + maxMissiles;
     }
 
     private void GameOverSequence()

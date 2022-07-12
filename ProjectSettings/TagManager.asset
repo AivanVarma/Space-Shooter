@@ -12,6 +12,7 @@ TagManager:
   - AvoidShot
   - DetectPowerup
   - RammingArea
+  - HomingMissile
   layers:
   - Default
   - TransparentFX
@@ -20,7 +21,7 @@ TagManager:
   - Water
   - UI
   - Post Processing
-  - 
+  - Enemy Detectors
   - 
   - 
   - 

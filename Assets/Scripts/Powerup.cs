@@ -4,21 +4,20 @@ using UnityEngine;
 
 public class Powerup : MonoBehaviour
 {
-    private float _xLeftBound = -7.2f;
-    private float _xRightBound = 7.2f;
+    //private float _xLeftBound = -7.2f;
+    //private float _xRightBound = 7.2f;
     private float _yBottomBound = -4f;
-    private float _yUpperBound = 8f;
+    //private float _yUpperBound = 8f;
 
     private float _speed = 3f;
 
-    [SerializeField] // Triple shot = 0, Speed = 1, Shield = 2, Health = 3, Ammo = 4, Scatter shot = 5, Negative Speed = 6
+    [SerializeField] // Triple shot = 0, Speed = 1, Shield = 2, Health = 3, Ammo = 4, Scatter shot = 5, Negative Speed = 6, Missiles = 7
     private int _powerupID;
 
     [SerializeField]
     private AudioClip _powerupSoundClip;
     private float _zSoundClipOffset = -10;
 
-    [SerializeField]
     private bool _inPowerupCollectorZone = false;
     private Transform _player;
     private float _collectedSpeed = 10f;
@@ -26,7 +25,7 @@ public class Powerup : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        transform.position = new Vector3(Random.Range(_xLeftBound, _xRightBound), _yUpperBound, 0);
+        //transform.position = new Vector3(Random.Range(_xLeftBound, _xRightBound), _yUpperBound, 0);
 
         _player = GameObject.Find("Player").GetComponent<Transform>();
 
@@ -45,7 +44,7 @@ public class Powerup : MonoBehaviour
         }
         else
         {
-            Movement();
+            //Movement();
         }
     }
 
@@ -93,6 +92,9 @@ public class Powerup : MonoBehaviour
                         break;
                     case 6:
                         player.NegativeSpeedBoostActive();
+                        break;
+                    case 7:
+                        player.MissilesCollected();
                         break;
                     default:
                         Debug.Log("Powerup ID not found!");
