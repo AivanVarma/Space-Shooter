@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    private float _baseSpeed = 3.5f;
     private float _speed = 3.5f;
     private float _deathSpeed = 0.75f;
     private bool _isDead = false;
@@ -24,8 +25,8 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     private GameObject _enemyLaserPrefab;
     private float _canFire = 1f;
-    private float _minimumFireRate = 3f;
-    private float _maximumFireRate = 6f;
+    private float _minFireRate = 3f;
+    private float _maxFireRate = 6f;
 
     [SerializeField]
     private GameObject _enemyShields;
@@ -42,6 +43,16 @@ public class Enemy : MonoBehaviour
     private Vector3 _evadeDirection;
     private int _maxEvasionDirection = 10;
     private float _evasionSpeedBoost = 1.5f;
+
+    private float _teleportRate = 3f;
+    private float _canTeleport = 3f;
+    private WaitForSeconds _teleportationWait = new WaitForSeconds(0.5f);
+
+    [SerializeField]
+    private GameObject _missilePrefab;
+    private float _canFireMissile = 3f;
+    private float _minMissileFireRate = 4f;
+    private float _maxMissileFireRate = 8f;
 
     // Start is called before the first frame update
     void Start()
@@ -73,11 +84,10 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Movement();
-
-        if (Time.time > _canFire)
+        if (!_isDead)
         {
-            FireLaser();
+            //Movement();
+            FiringMechanism();
         }
     }
 
@@ -109,11 +119,11 @@ public class Enemy : MonoBehaviour
 
     private void Movement()
     {
-        if (_ramPlayer && !_isDead)
+        if (_ramPlayer)
         {
             transform.position = Vector3.MoveTowards(transform.position, _rammingDirection, _rammingSpeed * Time.deltaTime);
         }
-        else if (_avoidShot && !_isDead)
+        else if (_avoidShot)
         {
             transform.position = Vector3.MoveTowards(transform.position, _evadeDirection, _speed * _evasionSpeedBoost * Time.deltaTime);
         }
@@ -122,10 +132,28 @@ public class Enemy : MonoBehaviour
             transform.Translate(_speed * Time.deltaTime * Vector3.down);
         }
 
+        if (Time.time > _canTeleport)
+        {
+            Teleport();
+        }
+
         if (transform.position.y < _yBottomBound || transform.position.y > _yUpperBound + _yOffset ||
             transform.position.x > _xRightBound + _xOffset || transform.position.x < _xLeftBound - _xOffset)
         {
             transform.position = RandomSpawnPosition();
+        }
+    }
+
+    private void FiringMechanism()
+    {
+        if (Time.time > _canFire)
+        {
+            FireLaser();
+        }
+
+        if (Time.time > _canFireMissile)
+        {
+            FireMissile();
         }
     }
 
@@ -140,7 +168,7 @@ public class Enemy : MonoBehaviour
 
         if (!_powerupDetected)
         {
-            float randomFireRate = Random.Range(_minimumFireRate, _maximumFireRate);
+            float randomFireRate = Random.Range(_minFireRate, _maxFireRate);
             _canFire = Time.time + randomFireRate;
         }
 
@@ -154,6 +182,21 @@ public class Enemy : MonoBehaviour
         }
 
         laser.GetComponent<Laser>().AssignEnemyLaser();
+    }
+
+    private void FireMissile()
+    {
+        if (_isDead)
+        {
+            return;
+        }
+
+        _canFireMissile = Time.time + Random.Range(_minMissileFireRate, _maxMissileFireRate);
+
+        Vector3 position = new Vector3(transform.position.x, transform.position.y - 1, transform.position.z);
+
+        GameObject enemyMissile = Instantiate(_missilePrefab, position, Quaternion.Euler(0, 0, 180));
+        enemyMissile.GetComponent<HomingMissile>().AssingEnemyMissile();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -183,7 +226,7 @@ public class Enemy : MonoBehaviour
             OnEnemyDeath();
         }
 
-        if (collision.CompareTag("HomingMissile"))
+        if (collision.CompareTag("HomingMissile") && !collision.transform.GetComponent<HomingMissile>().IsEnemyMissile())
         {
             _player.AddPoints(20);
 
@@ -258,5 +301,41 @@ public class Enemy : MonoBehaviour
         }
         
         _evadeDirection += transform.position;
+    }
+
+    private void Teleport()
+    {
+        _teleportRate = Random.Range(3f, 7f);
+        _canTeleport = Time.time + _teleportRate;
+
+        float randomX = Random.Range(_xLeftBound + 1, _xRightBound - 1);
+        float randomY = Random.Range(_yBottomBound + 1, _yUpperBound - 1);
+        Vector3 randomPosition = new Vector3(randomX, randomY, 0);
+
+        if (Vector3.Distance(randomPosition, _player.transform.position) < 2)
+        {
+            randomPosition.x += Random.value;
+            randomPosition.y += Random.value;
+        }
+
+        StartCoroutine(TeleportWaitRoutine(randomPosition));
+    }
+
+    private IEnumerator TeleportWaitRoutine(Vector3 position)
+    {
+        _speed = 0;
+
+        SpriteRenderer renderer = this.GetComponent<SpriteRenderer>();
+        Color color = renderer.color;
+        color.a = 0.25f;
+        renderer.color = color;
+        yield return _teleportationWait;
+
+        transform.position = position;
+
+        yield return _teleportationWait;
+        color.a = 1f;
+        renderer.color = color;
+        _speed = _baseSpeed;
     }
 }

@@ -7,6 +7,8 @@ public class HomingDetector : MonoBehaviour
     private HomingMissile _homingMissile;
     private List<Collider2D> _enemies = new List<Collider2D> ();
 
+    private bool _isEnemyMissile = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -16,6 +18,8 @@ public class HomingDetector : MonoBehaviour
         {
             Debug.LogError("HomingMissile is NULL!");
         }
+
+        _isEnemyMissile = _homingMissile.IsEnemyMissile();
     }
 
     // Update is called once per frame
@@ -54,17 +58,28 @@ public class HomingDetector : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Enemy"))
+        if (collision.CompareTag("Enemy") && !_isEnemyMissile)
         {
             _enemies.Add(collision);
+        }
+
+        if (collision.CompareTag("Player") && _isEnemyMissile)
+        {
+            Debug.Log("Collision: " + collision.tag);
+            _homingMissile.TargetAcquired(collision.gameObject);
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Enemy"))
+        if (collision.CompareTag("Enemy") && !_isEnemyMissile)
         {
             _homingMissile.TargetAcquired(collision.gameObject);
         }  
+
+        if (collision.CompareTag("Player") && _isEnemyMissile)
+        {
+            _homingMissile.TargetAcquired(collision.gameObject);
+        }
     }
 }

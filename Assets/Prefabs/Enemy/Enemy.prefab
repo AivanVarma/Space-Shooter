@@ -232,6 +232,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _enemyLaserPrefab: {fileID: 9096250138959653554, guid: 94e4cbbb2a630984bb99cb10d69ce894, type: 3}
   _enemyShields: {fileID: 7529587290060578603}
+  _missilePrefab: {fileID: 426412389763313333, guid: ec4679faba8d0f2418177c3f5bbda752, type: 3}
 --- !u!212 &648592206704725038
 SpriteRenderer:
   m_ObjectHideFlags: 0
