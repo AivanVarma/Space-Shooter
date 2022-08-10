@@ -77,8 +77,6 @@ public class HomingMissile : MonoBehaviour
     {
         _targetAcquired = !_targetAcquired;
         _target = target;
-
-        Debug.Log("Missile: " + _target.tag);
     }
 
     public void AssingEnemyMissile()

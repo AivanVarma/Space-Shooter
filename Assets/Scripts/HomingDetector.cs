@@ -65,7 +65,6 @@ public class HomingDetector : MonoBehaviour
 
         if (collision.CompareTag("Player") && _isEnemyMissile)
         {
-            Debug.Log("Collision: " + collision.tag);
             _homingMissile.TargetAcquired(collision.gameObject);
         }
     }

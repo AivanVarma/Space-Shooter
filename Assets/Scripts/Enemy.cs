@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    [SerializeField]
+    private int _enemyID; // Basic = 0, Teleporter = 1, Aggressive = 2, Smart = 3, Avoid Shot = 4
     private float _baseSpeed = 3.5f;
     private float _speed = 3.5f;
     private float _deathSpeed = 0.75f;
@@ -13,8 +15,8 @@ public class Enemy : MonoBehaviour
     private float _xRightBound = 9.2f;
     private float _yBottomBound = -6f;
     private float _yUpperBound = 8f;
-    private float _xOffset = 2f;
-    private float _yOffset = 4f;
+    private float _xOffset = 1f;
+    private float _yOffset = 1f;
 
     private Player _player;
 
@@ -44,8 +46,9 @@ public class Enemy : MonoBehaviour
     private int _maxEvasionDirection = 10;
     private float _evasionSpeedBoost = 1.5f;
 
-    private float _teleportRate = 3f;
     private float _canTeleport = 3f;
+    private float _minTeleportRate = 3f;
+    private float _maxTeleportRate = 7f;
     private WaitForSeconds _teleportationWait = new WaitForSeconds(0.5f);
 
     [SerializeField]
@@ -57,13 +60,17 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //transform.position = RandomSpawnPosition();
+        transform.position = RandomSpawnPosition();
 
         _player = GameObject.Find("Player").GetComponent<Player>();
 
         _anim = this.GetComponent<Animator>();
 
         _audioSource = this.GetComponent<AudioSource>();
+
+        _canFire = Time.time + _minFireRate;
+        _canFireMissile = Time.time + _minMissileFireRate;
+        _canTeleport = Time.time + _minTeleportRate;
 
         if (_player == null)
         {
@@ -86,7 +93,7 @@ public class Enemy : MonoBehaviour
     {
         if (!_isDead)
         {
-            //Movement();
+            Movement();
             FiringMechanism();
         }
     }
@@ -132,12 +139,12 @@ public class Enemy : MonoBehaviour
             transform.Translate(_speed * Time.deltaTime * Vector3.down);
         }
 
-        if (Time.time > _canTeleport)
+        if (Time.time > _canTeleport && _enemyID == 1)
         {
             Teleport();
         }
 
-        if (transform.position.y < _yBottomBound || transform.position.y > _yUpperBound + _yOffset ||
+        if (transform.position.y < _yBottomBound - _yOffset|| transform.position.y > _yUpperBound + _yOffset ||
             transform.position.x > _xRightBound + _xOffset || transform.position.x < _xLeftBound - _xOffset)
         {
             transform.position = RandomSpawnPosition();
@@ -151,7 +158,7 @@ public class Enemy : MonoBehaviour
             FireLaser();
         }
 
-        if (Time.time > _canFireMissile)
+        if (Time.time > _canFireMissile && _enemyID == 1)
         {
             FireMissile();
         }
@@ -159,11 +166,6 @@ public class Enemy : MonoBehaviour
 
     private void FireLaser()
     {
-        if (_isDead)
-        {
-            return;
-        }
-
         GameObject laser;
 
         if (!_powerupDetected)
@@ -186,11 +188,6 @@ public class Enemy : MonoBehaviour
 
     private void FireMissile()
     {
-        if (_isDead)
-        {
-            return;
-        }
-
         _canFireMissile = Time.time + Random.Range(_minMissileFireRate, _maxMissileFireRate);
 
         Vector3 position = new Vector3(transform.position.x, transform.position.y - 1, transform.position.z);
@@ -305,11 +302,11 @@ public class Enemy : MonoBehaviour
 
     private void Teleport()
     {
-        _teleportRate = Random.Range(3f, 7f);
-        _canTeleport = Time.time + _teleportRate;
+        float randomTeleportRate = Random.Range(_minTeleportRate, _maxTeleportRate);
+        _canTeleport = Time.time + randomTeleportRate;
 
-        float randomX = Random.Range(_xLeftBound + 1, _xRightBound - 1);
-        float randomY = Random.Range(_yBottomBound + 1, _yUpperBound - 1);
+        float randomX = Random.Range(_xLeftBound + _xOffset, _xRightBound - _xOffset);
+        float randomY = Random.Range(_yBottomBound + _yOffset, _yUpperBound - _yOffset);
         Vector3 randomPosition = new Vector3(randomX, randomY, 0);
 
         if (Vector3.Distance(randomPosition, _player.transform.position) < 2)

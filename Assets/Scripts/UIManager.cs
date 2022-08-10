@@ -21,6 +21,9 @@ public class UIManager : MonoBehaviour
     private TMP_Text _missileCountText;
 
     [SerializeField]
+    private TMP_Text _waveNumberText;
+
+    [SerializeField]
     private Image _livesImage;
 
     [SerializeField]
@@ -32,6 +35,7 @@ public class UIManager : MonoBehaviour
     private GameManager _gameManager;
 
     private WaitForSeconds _flicker = new WaitForSeconds(0.5f);
+    private WaitForSeconds _showWaveNumber = new WaitForSeconds(5f);
 
     // Start is called before the first frame update
     void Start()
@@ -91,6 +95,12 @@ public class UIManager : MonoBehaviour
         _missileCountText.text = missiles + "/" + maxMissiles;
     }
 
+    public void ShowWaveNumber(int wave)
+    {
+        _waveNumberText.text = "Wave " + wave;
+        StartCoroutine(WaveNumberRoutine());
+    }
+
     private void GameOverSequence()
     {
         _restartText.gameObject.SetActive(true);
@@ -117,5 +127,12 @@ public class UIManager : MonoBehaviour
 
             _gameOverText.gameObject.SetActive(false);
         }
+    }
+
+    IEnumerator WaveNumberRoutine()
+    {
+        _waveNumberText.gameObject.SetActive(true);
+        yield return _showWaveNumber;
+        _waveNumberText.gameObject.SetActive(false);
     }
 }
