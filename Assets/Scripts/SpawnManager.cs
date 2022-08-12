@@ -10,19 +10,24 @@ public class SpawnManager : MonoBehaviour
     private float _maxSpawnTimeEnemy = 4f;
     [SerializeField]
     private GameObject _enemyContainer;
-    private int _rotationOption = 0;
-    private int _maxRotationOptions = 3;
-    private float _minDeg = -90f;
-    private float _maxDeg = 90f;
+    private float _minAbsDeg = 15f;
+    private float _maxAbsDeg = 90f;
+    private int[] _enemyWeights = { 20, 1, 5, 5, 5 }; // Basic, Teleporter, Aggressive, Smart, Avoid Shot
+    private int _enemyWeightsSum;
+    private int[] _rotationWeights = { 20, 5, 5 }; // Top-down, Left-right, Right-left
+    private int _rotationWeightsSum;
 
     [SerializeField]
     private GameObject[] _powerups;
     private float _minSpawnTimePowerup = 3f;
     private float _maxSpawnTimePowerup = 7f;
+    private int[] _powerupWeights = { 6, 6, 3, 1, 20, 2, 2, 1 }; // Triple shot, Speed, Shield, Health, Ammo, Scatter shot, Negative Speed, Missiles
+    private int _powerupWeightsSum;
 
     private bool _stopSpawning = false;
 
-    private WaitForSeconds _waitBeforeSpawning = new WaitForSeconds(3f);
+    private WaitForSeconds _waitBeforeSpawningEnemies = new WaitForSeconds(1.5f);
+    private WaitForSeconds _waitBeforeSpawningPowerups = new WaitForSeconds(3f);
     private WaitForSeconds _waitBetweenWaves = new WaitForSeconds(6f);
     private WaitForSeconds _waitSpawning = new WaitForSeconds(1f);
 
@@ -40,6 +45,41 @@ public class SpawnManager : MonoBehaviour
         {
             Debug.LogError("UIManager is NULL!");
         }
+
+        _enemyWeightsSum = WeightsSum(_enemyWeights);
+        _powerupWeightsSum = WeightsSum(_powerupWeights);
+        _rotationWeightsSum = WeightsSum(_rotationWeights);
+    }
+
+    private int WeightsSum(int[] weights)
+    {
+        int sum = 0;
+
+        foreach (int weight in weights)
+        {
+            sum += weight;
+        }
+
+        return sum;
+    }
+
+    private int RouletteSelector(int[] weights, int weightsSum)
+    {
+        int i;
+
+        int rndWeight = Random.Range(0, weightsSum);
+
+        for (i = 0; i < weights.Length; i++)
+        {
+            if (rndWeight < weights[i])
+            {
+                break;
+            }
+
+            rndWeight -= weights[i];
+        }
+
+        return i;
     }
 
     public void StartSpawning()
@@ -96,37 +136,38 @@ public class SpawnManager : MonoBehaviour
 
     IEnumerator SpawnEnemyRoutine()
     {
-        yield return _waitBeforeSpawning;
+        yield return _waitBeforeSpawningEnemies;
 
         float randomDeg;
         int randomShield;
         int randomEnemy;
+        int rotationOption;
 
         GameObject newEnemy = null;
 
         while (!_stopSpawning)
         {
-            randomEnemy = Random.Range(0,_enemyPrefabs.Length);
-            _rotationOption = Random.Range(0, _maxRotationOptions);
+            randomEnemy = RouletteSelector(_enemyWeights, _enemyWeightsSum);
+            rotationOption = RouletteSelector(_rotationWeights, _rotationWeightsSum);
 
-            switch (_rotationOption)
+            switch (rotationOption)
             {
                 case 0:
                     newEnemy = Instantiate(_enemyPrefabs[randomEnemy], transform.position, Quaternion.identity);
                     break;
                 case 1:
-                    randomDeg = Random.Range(_minDeg, 0);
+                    randomDeg = Random.Range(- _maxAbsDeg, - _minAbsDeg);
                     newEnemy = Instantiate(_enemyPrefabs[randomEnemy], transform.position, Quaternion.Euler(0, 0, randomDeg));
                     break;
                 case 2:
-                    randomDeg = Random.Range(0, _maxDeg);
+                    randomDeg = Random.Range(_minAbsDeg, _maxAbsDeg);
                     newEnemy = Instantiate(_enemyPrefabs[randomEnemy], transform.position, Quaternion.Euler(0, 0, randomDeg));
                     break;
             }
            
             randomShield = Random.Range(0, 100);
 
-            if (randomShield < 33)
+            if (randomShield < 20)
             {
                 newEnemy.GetComponent<Enemy>().ActivateShields();
             }
@@ -141,13 +182,13 @@ public class SpawnManager : MonoBehaviour
 
     IEnumerator SpawnPowerupRoutine()
     {
-        yield return _waitBeforeSpawning;
+        yield return _waitBeforeSpawningPowerups;
 
         int randomPowerup;
 
         while (!_stopSpawning)
         {
-            randomPowerup = Random.Range(0, _powerups.Length);
+            randomPowerup = RouletteSelector(_powerupWeights, _powerupWeightsSum);
 
             Instantiate(_powerups[randomPowerup]);
 

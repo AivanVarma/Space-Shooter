@@ -10,6 +10,7 @@ public class Enemy : MonoBehaviour
     private float _speed = 3.5f;
     private float _deathSpeed = 0.75f;
     private bool _isDead = false;
+    private int[] _points = { 10, 100, 30, 30, 30 }; // Index zero used for shields as well.
 
     private float _xLeftBound = -9.2f;
     private float _xRightBound = 9.2f;
@@ -214,18 +215,14 @@ public class Enemy : MonoBehaviour
         {
             Destroy(collision.gameObject);
 
-            if (!_enemyShields.activeSelf)
-            {
-                _player.AddPoints(10);
-            }
-
+            _player.AddPoints(_points[_enemyID]);
 
             OnEnemyDeath();
         }
 
         if (collision.CompareTag("HomingMissile") && !collision.transform.GetComponent<HomingMissile>().IsEnemyMissile())
         {
-            _player.AddPoints(20);
+            _player.AddPoints(_points[_enemyID]);
 
             OnEnemyDeath();
         }
@@ -236,6 +233,7 @@ public class Enemy : MonoBehaviour
         if (_enemyShields.activeSelf)
         {
             _enemyShields.SetActive(false);
+            _player.AddPoints(_points[0]);
             return;
         }
 
@@ -254,7 +252,11 @@ public class Enemy : MonoBehaviour
     public void PowerupDetected()
     {
         _powerupDetected = true;
-        FireLaser();
+
+        if (!_isDead) {
+            FireLaser();
+        }
+        
         _powerupDetected = false;
     }
 
@@ -267,7 +269,12 @@ public class Enemy : MonoBehaviour
     public void PlayerBehind()
     {
         _playerBehind = true;
-        FireLaser();
+
+        if (!_isDead)
+        {
+            FireLaser();
+        }
+
         _playerBehind = false;
     }
 
@@ -309,7 +316,7 @@ public class Enemy : MonoBehaviour
         float randomY = Random.Range(_yBottomBound + _yOffset, _yUpperBound - _yOffset);
         Vector3 randomPosition = new Vector3(randomX, randomY, 0);
 
-        if (Vector3.Distance(randomPosition, _player.transform.position) < 2)
+        if (Vector3.Distance(randomPosition, _player.transform.position) < 3)
         {
             randomPosition.x += Random.value;
             randomPosition.y += Random.value;
