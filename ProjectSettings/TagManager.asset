@@ -13,6 +13,7 @@ TagManager:
   - DetectPowerup
   - RammingArea
   - HomingMissile
+  - Boss
   layers:
   - Default
   - TransparentFX

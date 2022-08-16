@@ -71,6 +71,11 @@ public class HomingMissile : MonoBehaviour
             collision.GetComponent<Player>().Damage();
             OnHit();
         }
+
+        if (collision.CompareTag("Boss") && !_isEnemyMissile)
+        {
+            OnHit();
+        }
     }
 
     public void TargetAcquired(GameObject target)

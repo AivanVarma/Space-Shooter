@@ -67,6 +67,11 @@ public class HomingDetector : MonoBehaviour
         {
             _homingMissile.TargetAcquired(collision.gameObject);
         }
+
+        if (collision.CompareTag("Boss") && !_isEnemyMissile)
+        {
+            _homingMissile.TargetAcquired(collision.gameObject);
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -77,6 +82,11 @@ public class HomingDetector : MonoBehaviour
         }  
 
         if (collision.CompareTag("Player") && _isEnemyMissile)
+        {
+            _homingMissile.TargetAcquired(collision.gameObject);
+        }
+
+        if (collision.CompareTag("Boss") && !_isEnemyMissile)
         {
             _homingMissile.TargetAcquired(collision.gameObject);
         }
