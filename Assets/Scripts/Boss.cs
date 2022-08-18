@@ -19,11 +19,32 @@ public class Boss : MonoBehaviour
     private int _shieldStrength = 4;
     private float _shieldsRecharged = 20f;
     private float _shieldsRechargeTime = 20f;
-    private float _shieldsMinRechargeTime = 10f;
-    private float _shieldsMaxRechargeTime = 20f;
+    private float _shieldsMinRechargeTime = 5f;
+    private float _shieldsMaxRechargeTime = 10f;
 
     [SerializeField]
     private GameObject[] _damages;
+
+    [SerializeField]
+    private GameObject[] _laserBanks;
+    [SerializeField]
+    private GameObject _laserPrefab;
+    private int _degreesBetweenLasers = 10;
+    private int _maxSpredDeg = 90;
+    private float _canFireLaser;
+    private float _laserFireRate;
+    private float _minLaserFireRate = 1f;
+    private float _maxLaserFireRate = 3f;
+
+    [SerializeField]
+    private GameObject[] _missileBanks;
+    [SerializeField]
+    private GameObject _missilePrefab;
+    private int _degreesBetweenMissiles = 25;
+    private float _canFireMissile;
+    private float _missileFireRate;
+    private float _minMissileFireRate = 3f;
+    private float _maxMissileFireRate = 6f;
 
     private Player _player;
 
@@ -41,6 +62,9 @@ public class Boss : MonoBehaviour
         _shieldRenderer = _shields.GetComponent<SpriteRenderer>();
         _shieldColor = _shieldRenderer.color;
         _shields.SetActive(true);
+
+        _canFireLaser = Time.time + _maxLaserFireRate;
+        _canFireMissile = Time.time + _maxMissileFireRate;
     }
 
     // Update is called once per frame
@@ -54,6 +78,16 @@ public class Boss : MonoBehaviour
         if (!_shields.activeSelf && Time.time > _shieldsRecharged)
         {
             _shields.SetActive(true);
+        }
+
+        if (Time.time > _canFireLaser && _stoppedMoving)
+        {
+            FireLaser();
+        }
+
+        if (Time.time > _canFireMissile && _stoppedMoving)
+        {
+            FireMissile();
         }
     }
 
@@ -69,7 +103,7 @@ public class Boss : MonoBehaviour
         }
     }
 
-    private void Damage()
+    public void Damage()
     {
         if (_shields.activeSelf)
         {
@@ -115,7 +149,69 @@ public class Boss : MonoBehaviour
             _shieldRenderer.color = _shieldColor;
             _shieldStrength = _shieldBaseStrength;
             _shieldsRechargeTime = Random.Range(_shieldsMinRechargeTime, _shieldsMaxRechargeTime);
-            _shieldsRecharged = _shieldsRechargeTime + Time.time;
+            _shieldsRecharged = _shieldsRechargeTime + _health + Time.time;
+        }
+    }
+
+    private void FireLaser()
+    {
+        _laserFireRate = Random.Range(_minLaserFireRate, _maxLaserFireRate);
+        _canFireLaser = _laserFireRate + _health + Time.time;
+
+        int degrees = 0;
+        int deg = 0;
+        GameObject laser;
+
+        while (degrees <= _maxSpredDeg)
+        {
+            for (int i = 0; i < _laserBanks.Length; i++)
+            {
+                if (i % 2 == 0)
+                {
+                    deg = -1 * degrees;
+                }
+                else
+                {
+                    deg = degrees;
+                }
+
+                laser = Instantiate(_laserPrefab, _laserBanks[i].transform.position, Quaternion.Euler(0, 0, deg));
+
+                laser.GetComponent<Laser>().AssignEnemyLaser();
+            }
+
+            degrees += _health * _degreesBetweenLasers;
+        }
+    }
+
+    private void FireMissile()
+    {
+        _missileFireRate = Random.Range(_minMissileFireRate, _maxMissileFireRate);
+        _canFireMissile = _missileFireRate + _health + Time.time;
+
+        int degrees = 0;
+        int deg = 0;
+        GameObject missile;
+
+        while (degrees <= _maxSpredDeg)
+        {
+            for (int i = 0; i < _missileBanks.Length; i++)
+            {
+                if (i % 2 == 0)
+                {
+                    deg = -1 * degrees;
+                }
+                else
+                {
+                    deg = degrees;
+                }
+
+                missile = Instantiate(_missilePrefab, _missileBanks[i].transform.position, Quaternion.Euler(0, 0, 180 + deg));
+
+                missile.GetComponent<HomingMissile>().AssingEnemyMissile();
+            }
+
+            degrees += _health * _degreesBetweenMissiles;
         }
     }
 
@@ -132,7 +228,7 @@ public class Boss : MonoBehaviour
             Damage();
         }
 
-        if (collision.CompareTag("Laser"))
+        if (collision.CompareTag("Laser") && !collision.gameObject.GetComponent<Laser>().IsEnemyLaser())
         {
             if (_shields.activeSelf)
             {
@@ -142,13 +238,13 @@ public class Boss : MonoBehaviour
             {
                 _player.AddPoints(100);
             }
-            
+
             Destroy(collision.gameObject);
 
             Damage();
         }
 
-        if (collision.CompareTag("HomingMissile"))
+        if (collision.CompareTag("HomingMissile") && !collision.gameObject.GetComponent<HomingMissile>().IsEnemyMissile())
         {
             if (_shields.activeSelf)
             {

@@ -211,7 +211,7 @@ public class Enemy : MonoBehaviour
             OnEnemyDeath();
         }
 
-        if (collision.CompareTag("Laser"))
+        if (collision.CompareTag("Laser") && !collision.gameObject.GetComponent<Laser>().IsEnemyLaser())
         {
             Destroy(collision.gameObject);
 

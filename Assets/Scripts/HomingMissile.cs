@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class HomingMissile : MonoBehaviour
 {
-    private float _xLeftBound = -9.2f;
-    private float _xRightBound = 9.2f;
-    private float _yBottomBound = -8f;
-    private float _yUpperBound = 8f;
+    private float _xLeftBound = -11f;
+    private float _xRightBound = 11f;
+    private float _yBottomBound = -10f;
+    private float _yUpperBound = 10f;
 
     private float _speed = 5f;
     private float _homingSpeed = 7.5f;
