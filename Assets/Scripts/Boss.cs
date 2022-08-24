@@ -46,6 +46,15 @@ public class Boss : MonoBehaviour
     private float _minMissileFireRate = 3f;
     private float _maxMissileFireRate = 6f;
 
+    [SerializeField]
+    private GameObject[] _beams;
+    private float _canFireBeam;
+    private float _beamFireRate;
+    private float _minBeamFireRate = 6f;
+    private float _maxBeamFireRate = 9f;
+    private float _minBeamDeg = 0f;
+    private float _maxBeamDeg = 90f;
+
     private Player _player;
 
 
@@ -65,6 +74,12 @@ public class Boss : MonoBehaviour
 
         _canFireLaser = Time.time + _maxLaserFireRate;
         _canFireMissile = Time.time + _maxMissileFireRate;
+        _canFireBeam = Time.time + _maxBeamFireRate;
+
+        foreach (var beam in _beams)
+        {
+            beam.SetActive(false);
+        }
     }
 
     // Update is called once per frame
@@ -88,6 +103,11 @@ public class Boss : MonoBehaviour
         if (Time.time > _canFireMissile && _stoppedMoving)
         {
             FireMissile();
+        }
+
+        if (Time.time > _canFireBeam && _stoppedMoving)
+        {
+            FireBeam();
         }
     }
 
@@ -212,6 +232,36 @@ public class Boss : MonoBehaviour
             }
 
             degrees += _health * _degreesBetweenMissiles;
+        }
+    }
+
+    private void FireBeam()
+    {
+        _beamFireRate = Random.Range(_minBeamFireRate, _maxBeamFireRate);
+        _canFireBeam = _beamFireRate + _health + Time.time;
+
+        int direction = Mathf.RoundToInt(Random.value);
+        int sign = 1;
+
+        for (int i = 0; i < _beams.Length; i++)
+        {
+            if (i % 2 == 0)
+            {
+                sign = -1;
+            }
+            else
+            {
+                sign = 1;
+            }
+
+            if (direction == 0)
+            {
+                _beams[i].GetComponentInChildren<Beam>().ActivateBeam(_minBeamDeg, sign * _maxBeamDeg);
+            }
+            else
+            {
+                _beams[i].GetComponentInChildren<Beam>().ActivateBeam(sign * _maxBeamDeg, _minBeamDeg);
+            }
         }
     }
 
