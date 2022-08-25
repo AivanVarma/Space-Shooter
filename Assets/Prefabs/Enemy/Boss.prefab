@@ -1696,6 +1696,7 @@ MonoBehaviour:
   _beams:
   - {fileID: 630088110}
   - {fileID: 1320753004}
+  _explosionPrefab: {fileID: 1021931465786549713, guid: 739c60ef2ea6e40409730a7fa6ae231a, type: 3}
 --- !u!1 &8810209069273275677
 GameObject:
   m_ObjectHideFlags: 0

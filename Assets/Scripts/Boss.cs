@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Boss : MonoBehaviour
 {
     private int _health = 9;
+
+    private int[] _points = { 50, 100, 1000 }; // Shield shot, Body shot, Death
 
     private float _yStopPosition = 3.39f;
     private bool _stoppedMoving = false;
@@ -55,6 +58,11 @@ public class Boss : MonoBehaviour
     private float _minBeamDeg = 0f;
     private float _maxBeamDeg = 90f;
 
+    [SerializeField]
+    private GameObject _explosionPrefab;
+    HashSet<int> _explosionPositions = new HashSet<int>();
+    private WaitForSeconds _waitBetweenExplosions = new WaitForSeconds(0.5f);
+
     private Player _player;
 
 
@@ -90,22 +98,22 @@ public class Boss : MonoBehaviour
             MoveToPlace();
         }
 
-        if (!_shields.activeSelf && Time.time > _shieldsRecharged)
+        if (!_shields.activeSelf && Time.time > _shieldsRecharged && _health > 0)
         {
             _shields.SetActive(true);
         }
 
-        if (Time.time > _canFireLaser && _stoppedMoving)
+        if (Time.time > _canFireLaser && _stoppedMoving && _health > 0)
         {
             FireLaser();
         }
 
-        if (Time.time > _canFireMissile && _stoppedMoving)
+        if (Time.time > _canFireMissile && _stoppedMoving && _health > 0)
         {
             FireMissile();
         }
 
-        if (Time.time > _canFireBeam && _stoppedMoving)
+        if (Time.time > _canFireBeam && _stoppedMoving && _health > 0)
         {
             FireBeam();
         }
@@ -148,6 +156,10 @@ public class Boss : MonoBehaviour
                     }
 
                 } while (_damages[randomDamage].activeSelf);
+            }
+            else
+            {
+                OnDeath();
             }
 
         }
@@ -265,6 +277,24 @@ public class Boss : MonoBehaviour
         }
     }
 
+    private void OnDeath()
+    {
+        _player.AddPoints(_points[2]);
+
+        
+        int rnd;
+
+        while (_explosionPositions.Count < 3)
+        {
+            rnd = Random.Range(0, _damages.Length);
+            _explosionPositions.Add(rnd);
+        }
+
+        StartCoroutine(DeathRoutine());
+
+        Destroy(this.transform.GetComponent<SpriteRenderer>(), 0.5f);
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (!_stoppedMoving)
@@ -282,11 +312,11 @@ public class Boss : MonoBehaviour
         {
             if (_shields.activeSelf)
             {
-                _player.AddPoints(50);
+                _player.AddPoints(_points[0]);
             }
             else
             {
-                _player.AddPoints(100);
+                _player.AddPoints(_points[1]);
             }
 
             Destroy(collision.gameObject);
@@ -298,14 +328,26 @@ public class Boss : MonoBehaviour
         {
             if (_shields.activeSelf)
             {
-                _player.AddPoints(50);
+                _player.AddPoints(_points[0]);
             }
             else
             {
-                _player.AddPoints(100);
+                _player.AddPoints(_points[1]);
             }
 
             Damage();
         }
+    }
+
+    IEnumerator DeathRoutine()
+    {
+        foreach (var position in _explosionPositions)
+        {
+            Instantiate(_explosionPrefab, _damages[position].transform.position, Quaternion.identity);
+
+            yield return _waitBetweenExplosions;
+        }
+
+        Destroy(this.gameObject);
     }
 }
