@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class Laser : MonoBehaviour
 {
-    private float _speed = 10.0f;
+    private float _speed = 10f;
 
+    private float _xLeftBound = -11f;
+    private float _xRightBound = 11f;
     private float _yUpperBound = 8.0f;
     private float _yLowerBound = -6f;
 
@@ -30,7 +32,8 @@ public class Laser : MonoBehaviour
         }
         
 
-        if (transform.position.y > _yUpperBound || transform.position.y < _yLowerBound)
+        if (transform.position.x > _xRightBound || transform.position.x < _xLeftBound ||
+            transform.position.y > _yUpperBound || transform.position.y < _yLowerBound)
         {
             if (transform.parent != null)
             {
@@ -46,6 +49,11 @@ public class Laser : MonoBehaviour
         _isEnemyLaser = true;
     }
 
+    public bool IsEnemyLaser()
+    {
+        return _isEnemyLaser;
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player") && _isEnemyLaser)
@@ -54,6 +62,12 @@ public class Laser : MonoBehaviour
 
             player.Damage();
 
+            Destroy(this.gameObject);
+        }
+
+        if (_isEnemyLaser && collision.CompareTag("Powerup"))
+        {
+            Destroy(collision.gameObject);
             Destroy(this.gameObject);
         }
     }

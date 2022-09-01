@@ -7,6 +7,14 @@ TagManager:
   - Enemy
   - Laser
   - Powerup
+  - PowerupCollector
+  - PlayerBehind
+  - AvoidShot
+  - DetectPowerup
+  - RammingArea
+  - HomingMissile
+  - Boss
+  - Beam
   layers:
   - Default
   - TransparentFX
@@ -15,7 +23,7 @@ TagManager:
   - Water
   - UI
   - Post Processing
-  - 
+  - Enemy Detectors
   - 
   - 
   - 

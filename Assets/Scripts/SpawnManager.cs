@@ -5,55 +5,224 @@ using UnityEngine;
 public class SpawnManager : MonoBehaviour
 {
     [SerializeField]
-    private GameObject _enemyPrefab;
-    private float _spawnInterval = 1f;
+    private GameObject[] _enemyPrefabs;
+    private float _minSpawnTimeEnemy = 1.5f;
+    private float _maxSpawnTimeEnemy = 4f;
+    [SerializeField]
+    private GameObject _enemyContainer;
+    private float _minAbsDeg = 15f;
+    private float _maxAbsDeg = 90f;
+    private int[] _enemyWeights = { 20, 1, 5, 5, 5 }; // Basic, Teleporter, Aggressive, Smart, Avoid Shot
+    private int _enemyWeightsSum;
+    private int[] _rotationWeights = { 20, 5, 5 }; // Top-down, Left-right, Right-left
+    private int _rotationWeightsSum;
 
     [SerializeField]
     private GameObject[] _powerups;
-    private float _minSpawnTime = 3f;
-    private float _maxSpawnTime = 7f;
+    private float _minSpawnTimePowerup = 3f;
+    private float _maxSpawnTimePowerup = 7f;
+    private int[] _powerupWeights = { 6, 6, 3, 1, 20, 2, 2, 2 }; // Triple shot, Speed, Shield, Health, Ammo, Scatter shot, Negative Speed, Missiles
+    private int _powerupWeightsSum;
 
     [SerializeField]
-    private GameObject _enemyContainer;
+    private GameObject _bossPrefab;
+
+    [SerializeField]
+    private GameObject _asteroidPrefab;
 
     private bool _stopSpawning = false;
 
-    private WaitForSeconds _waitBeforeSpawning = new WaitForSeconds(3f);
-    public void StartSpawning()
+    private WaitForSeconds _waitBeforeSpawningEnemies = new WaitForSeconds(1.5f);
+    private WaitForSeconds _waitBeforeSpawningPowerups = new WaitForSeconds(3f);
+    private WaitForSeconds _waitBetweenWaves = new WaitForSeconds(6f);
+    private WaitForSeconds _waitSpawning = new WaitForSeconds(1f);
+
+    private int _wavesTotal = 6;
+    private int _currentWave = 1;
+    private int _enemiesBaseAmount = 5;
+    private int _enemiesSpawned = 0;
+
+    private UIManager _uiManager;
+
+    private void Start()
     {
-        StartCoroutine(SpawnEnemyRoutine());
+        _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
+
+        if (_uiManager == null)
+        {
+            Debug.LogError("UIManager is NULL!");
+        }
+
+        _enemyWeightsSum = WeightsSum(_enemyWeights);
+        _powerupWeightsSum = WeightsSum(_powerupWeights);
+        _rotationWeightsSum = WeightsSum(_rotationWeights);
+
+        Instantiate(_asteroidPrefab, transform.position, Quaternion.identity);
+    }
+
+    private int WeightsSum(int[] weights)
+    {
+        int sum = 0;
+
+        foreach (int weight in weights)
+        {
+            sum += weight;
+        }
+
+        return sum;
+    }
+
+    private int RouletteSelector(int[] weights, int weightsSum)
+    {
+        int i;
+
+        int rndWeight = Random.Range(0, weightsSum);
+
+        for (i = 0; i < weights.Length; i++)
+        {
+            if (rndWeight < weights[i])
+            {
+                break;
+            }
+
+            rndWeight -= weights[i];
+        }
+
+        return i;
+    }
+
+    private void SpawnBoss()
+    {
+        Instantiate(_bossPrefab, transform.position, Quaternion.identity);
+
         StartCoroutine(SpawnPowerupRoutine());
     }
 
+    public void StartSpawning()
+    {
+        StartCoroutine(SpawnWavesRoutine());
+    }
+
+    IEnumerator SpawnWavesRoutine()
+    {
+        int enemiesInWave = _enemiesBaseAmount * _currentWave;
+        bool allEnemiesSpawned = false;
+
+        _uiManager.ShowWaveNumber(_currentWave);
+
+        yield return _waitBetweenWaves;
+
+        Coroutine spawnEnemies = StartCoroutine(SpawnEnemyRoutine());
+        Coroutine spawnPowerups = StartCoroutine(SpawnPowerupRoutine());
+
+        while (_currentWave <= _wavesTotal)
+        {
+            if (_enemiesSpawned == enemiesInWave && !allEnemiesSpawned)
+            {
+                StopCoroutine(spawnEnemies);
+                allEnemiesSpawned = true;
+            }
+
+            if (_enemyContainer.transform.childCount == 0 && allEnemiesSpawned)
+            {
+                StopCoroutine(spawnPowerups);
+                _enemiesSpawned = 0;
+
+                if (_currentWave < _wavesTotal)
+                {
+                    _currentWave++;
+
+                    enemiesInWave = _enemiesBaseAmount * _currentWave;
+                    allEnemiesSpawned = false;
+                    _enemiesSpawned = 0;
+
+                    _uiManager.ShowWaveNumber(_currentWave);
+
+                    yield return _waitBetweenWaves;
+
+                    spawnEnemies = StartCoroutine(SpawnEnemyRoutine());
+                    spawnPowerups = StartCoroutine(SpawnPowerupRoutine());
+                }
+                else
+                {
+                    _currentWave++;
+                }
+            }
+
+            yield return _waitSpawning;
+        }
+
+        if (_currentWave > _wavesTotal)
+        {
+            yield return _waitBetweenWaves;
+
+            SpawnBoss();
+        }
+    }
 
     IEnumerator SpawnEnemyRoutine()
     {
-        yield return _waitBeforeSpawning;
+        yield return _waitBeforeSpawningEnemies;
+
+        float randomDeg;
+        int randomShield;
+        int randomEnemy;
+        int rotationOption;
+
+        GameObject newEnemy = null;
 
         while (!_stopSpawning)
         {
-            GameObject newEnemy = Instantiate(_enemyPrefab);
+            randomEnemy = RouletteSelector(_enemyWeights, _enemyWeightsSum);
+            rotationOption = RouletteSelector(_rotationWeights, _rotationWeightsSum);
+
+            switch (rotationOption)
+            {
+                case 0:
+                    newEnemy = Instantiate(_enemyPrefabs[randomEnemy], transform.position, Quaternion.identity);
+                    break;
+                case 1:
+                    randomDeg = Random.Range(- _maxAbsDeg, - _minAbsDeg);
+                    newEnemy = Instantiate(_enemyPrefabs[randomEnemy], transform.position, Quaternion.Euler(0, 0, randomDeg));
+                    break;
+                case 2:
+                    randomDeg = Random.Range(_minAbsDeg, _maxAbsDeg);
+                    newEnemy = Instantiate(_enemyPrefabs[randomEnemy], transform.position, Quaternion.Euler(0, 0, randomDeg));
+                    break;
+            }
+           
+            randomShield = Random.Range(0, 100);
+
+            if (randomShield < 20)
+            {
+                newEnemy.GetComponent<Enemy>().ActivateShields();
+            }
+
             newEnemy.transform.parent = _enemyContainer.transform;
 
-            yield return new WaitForSeconds(_spawnInterval);
+            _enemiesSpawned++;
+
+            yield return new WaitForSeconds(Random.Range(_minSpawnTimeEnemy, _maxSpawnTimeEnemy));
         }
     }
 
     IEnumerator SpawnPowerupRoutine()
     {
-        yield return _waitBeforeSpawning;
+        yield return _waitBeforeSpawningPowerups;
+
+        int randomPowerup;
 
         while (!_stopSpawning)
         {
-            int randomPowerup = Random.Range(0, 3);
+            randomPowerup = RouletteSelector(_powerupWeights, _powerupWeightsSum);
 
             Instantiate(_powerups[randomPowerup]);
 
-            yield return new WaitForSeconds(Random.Range(_minSpawnTime, _maxSpawnTime));
+            yield return new WaitForSeconds(Random.Range(_minSpawnTimePowerup, _maxSpawnTimePowerup));
         }
     }
 
-    public void OnPlayerDeath()
+    public void StopSpawning()
     {
         _stopSpawning = true;
     }

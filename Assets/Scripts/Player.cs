@@ -6,6 +6,7 @@ public class Player : MonoBehaviour
 {
     private SpawnManager _spawnManager;
     private UIManager _uiManager;
+    private MainCamera _mainCamera;
 
     private Vector3 _startingPosition = new Vector3(0, 0, 0);
 
@@ -34,16 +35,30 @@ public class Player : MonoBehaviour
     private float _speedBoost = 1f;
     private float _speedBoostBaseCoefficient = 1f;
     private float _speedBoostCoefficient = 3f;
-
+    private float _negativeSpeedBoostCoefficient = 0.5f;
+    
     [SerializeField]
     private GameObject _shields;
     private bool _isShieldActive = false;
+    private int _shieldHealth = 3;
+    [SerializeField]
+    private SpriteRenderer _shieldRenderer;
+    private float[] _shieldAChannel = new float[4] { 0f, 0.02f, 0.4f, 1f }; // 0 health, 1 health, 2 health, 3 health
+    private Color _shieldColor;
 
     [SerializeField]
     private GameObject[] _engineDamage;
 
     [SerializeField]
     private GameObject[] _thrusters;
+    private float _thrustersBoost = 2f;
+    private Color _thrusterOriginalColor;
+    private Color _thrusterColor;
+    private float _thrusterValue = 1f;
+    private float _thrusterUpdateInterval = 0.05f;
+    private float _thrusterValueIncrement = 0.01f;
+    private float _thrusterUpdate = -1f;
+    private bool _thrusterOffline = false;
 
     private AudioSource _audioSource;
     [SerializeField]
@@ -52,6 +67,21 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject _explosionPrefab;
 
+    private int _pointsFromExtraLife = 500;
+
+    private int _maxAmmo = 15;
+    private int _ammoCount;
+    private int _pointsWhenAmmoFull = 100;
+
+    [SerializeField]
+    private GameObject _scatterShotPrefab;
+    private bool _isScatterShotActive = false;
+
+    [SerializeField]
+    private GameObject _homingMissilePrefab;
+    private int _missileCount = 0;
+    private int _maxMissileCount = 5;
+    private int _pointsWhenMissilesFull = 400;
 
     // Start is called before the first frame update
     void Start()
@@ -65,7 +95,16 @@ public class Player : MonoBehaviour
 
         _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
 
+        _mainCamera = GameObject.Find("Main Camera").GetComponent<MainCamera>();
+
         _audioSource = GetComponent<AudioSource>();
+
+        _shieldColor = _shieldRenderer.color;
+
+        _thrusterOriginalColor = _thrusters[0].GetComponent<SpriteRenderer>().color;
+        _thrusterColor = new Color(255, 0, 200, 255);
+
+        _ammoCount = _maxAmmo;
 
         if (_spawnManager == null)
         {
@@ -77,10 +116,19 @@ public class Player : MonoBehaviour
             Debug.LogError("The UI Manager is NULL!");
         }
 
+        if (_mainCamera == null)
+        {
+            Debug.LogError("The Main Camera is NULL!");
+        }
+
         if (_audioSource == null)
         {
             Debug.LogError("The Audio Source is NULL!");
         }
+
+        _uiManager.UpdateScore(_score);
+        _uiManager.UpdateAmmoCount(_ammoCount, _maxAmmo);
+        _uiManager.UpdateMissileCount(_missileCount, _maxMissileCount);
     }
 
     // Update is called once per frame
@@ -88,9 +136,14 @@ public class Player : MonoBehaviour
     {
         Movement();
 
-        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)
+        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire && _ammoCount > 0)
         {
             FireLaser();
+        }
+
+        if (Input.GetKeyDown(KeyCode.E) && _missileCount > 0)
+        {
+            FireMissile();
         }
     }
 
@@ -101,7 +154,21 @@ public class Player : MonoBehaviour
 
         Vector3 direction = new Vector3(horizontalInput, verticalInput, 0).normalized;
 
-        transform.Translate(_speedBoost * _speed * Time.deltaTime * direction);
+        if (Input.GetKey(KeyCode.LeftShift) && !_thrusterOffline)
+        {
+            transform.Translate(_thrustersBoost * _speedBoost * _speed * Time.deltaTime * direction);
+
+            ThrustersOn(true);
+        }
+        else
+        {
+            transform.Translate(_speedBoost * _speed * Time.deltaTime * direction);
+
+            if (_thrusterValue < 1)
+            {
+                ThrustersOn(false);
+            }
+        }
 
         transform.position = new Vector3(Mathf.Clamp(transform.position.x, _xLeftBound, _xRightBound), transform.position.y, 0);
         transform.position = new Vector3(transform.position.x, Mathf.Clamp(transform.position.y, _yBottomBound, _yUpperBound), 0);
@@ -109,9 +176,17 @@ public class Player : MonoBehaviour
 
     private void FireLaser()
     {
+        _ammoCount--;
+
+        _uiManager.UpdateAmmoCount(_ammoCount, _maxAmmo);
+
         if (_isTripleShotActive)
         {
             Instantiate(_tripleShotPrefab, transform.position, Quaternion.identity);
+        }
+        if (_isScatterShotActive)
+        {
+            Instantiate(_scatterShotPrefab, transform.position + _offset, Quaternion.identity);
         }
         else
         {
@@ -120,16 +195,23 @@ public class Player : MonoBehaviour
 
         _audioSource.clip = _laserSoundClip;
         _audioSource.Play();
-        
+
         _canFire = Time.time + _fireRate;
+    }
+
+    private void FireMissile()
+    {
+        _missileCount--;
+
+        _uiManager.UpdateMissileCount(_missileCount, _maxMissileCount);
+        Instantiate(_homingMissilePrefab, transform.position, Quaternion.identity);
     }
 
     public void Damage()
     {
         if (_isShieldActive)
         {
-            _isShieldActive = false;
-            _shields.SetActive(_isShieldActive);
+            ShieldDamage();
             return;
         }
 
@@ -139,14 +221,32 @@ public class Player : MonoBehaviour
 
         _uiManager.UpdateLives(_lives);
 
+        _mainCamera.PlayerDamageShake();
+
         if (_lives < 1)
         {
-            _spawnManager.OnPlayerDeath();
+            _spawnManager.StopSpawning();
 
             Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
 
+            _uiManager.GameOver(false);
+
             Destroy(this.gameObject);
         }
+    }
+
+    private void ShieldDamage()
+    {
+        _shieldHealth--;
+
+        if (_shieldHealth == 0)
+        {
+            _isShieldActive = false;
+            _shields.SetActive(_isShieldActive);
+        }
+
+        _shieldColor.a = _shieldAChannel[_shieldHealth];
+        _shieldRenderer.color = _shieldColor;
     }
 
     private void EngineDamage()
@@ -172,6 +272,43 @@ public class Player : MonoBehaviour
                 break;
         }
     }
+    private void ThrustersOn(bool online)
+    {
+        if (Time.time > _thrusterUpdate)
+        {
+            if (online)
+            {
+                foreach (var thruster in _thrusters)
+                {
+                    thruster.GetComponent<SpriteRenderer>().color = _thrusterColor;
+                }
+
+                _thrusterValue -= _thrusterValueIncrement;
+
+                if (_thrusterValue < 0)
+                {
+                    _thrusterOffline = true;
+                }
+            }
+            else
+            {
+                foreach (var thruster in _thrusters)
+                {
+                    thruster.GetComponent<SpriteRenderer>().color = _thrusterOriginalColor;
+                }
+
+                _thrusterValue += _thrusterValueIncrement;
+
+                if (Mathf.Approximately(1f, _thrusterValue))
+                {
+                    _thrusterOffline = false;
+                }
+            }
+
+            _uiManager.UpdateThrusterUI(_thrusterValue);
+            _thrusterUpdate = Time.time + _thrusterUpdateInterval;
+        }
+    }
 
     public void TripleShotActive()
     {
@@ -185,17 +322,84 @@ public class Player : MonoBehaviour
         StartCoroutine(SpeedBoostPowerDownRoutine());
     }
 
+    public void NegativeSpeedBoostActive()
+    {
+        _speedBoost = _negativeSpeedBoostCoefficient;
+        StartCoroutine(SpeedBoostPowerDownRoutine());
+    }
+
     public void ShieldsActive()
     {
+        _shieldHealth = 3;
+        _shieldColor.a = _shieldAChannel[_shieldHealth];
+        _shieldRenderer.color = _shieldColor;
+
         _isShieldActive = true;
         _shields.SetActive(_isShieldActive);
     }
 
-    public void AddPoints (int points)
+    public void LifeCollected()
+    {
+        if (_lives == 3)
+        {
+            AddPoints(_pointsFromExtraLife);
+        }
+        else
+        {
+            _lives++;
+            _uiManager.UpdateLives(_lives);
+
+            if (_engineDamage[0].activeSelf)
+            {
+                _engineDamage[0].SetActive(false);
+                _thrusters[0].SetActive(true);
+            }
+            else
+            {
+                _engineDamage[1].SetActive(false);
+                _thrusters[1].SetActive(true);
+            }
+        }
+    }
+
+    public void AmmoCollected()
+    {
+        if (_ammoCount < _maxAmmo)
+        {
+            _ammoCount = _maxAmmo;
+            _uiManager.UpdateAmmoCount(_ammoCount,_maxAmmo);
+        }
+        else
+        {
+            AddPoints(_pointsWhenAmmoFull);
+        }
+    }
+
+    public void MissilesCollected()
+    {
+        if (_missileCount < _maxMissileCount)
+        {
+            _missileCount = _maxMissileCount;
+            _uiManager.UpdateMissileCount(_missileCount, _maxMissileCount);
+        }
+        else
+        {
+            AddPoints(_pointsWhenMissilesFull);
+        }
+    }
+
+    public void AddPoints(int points)
     {
         _score += points;
 
         _uiManager.UpdateScore(_score);
+    }
+
+    public void ScatterShotActive()
+    {
+        _isScatterShotActive = true;
+
+        StartCoroutine(ScatterShotPowerDownRoutine());
     }
 
     IEnumerator TripleShotPowerDownRoutine()
@@ -204,10 +408,18 @@ public class Player : MonoBehaviour
 
         _isTripleShotActive = false;
     }
+
     IEnumerator SpeedBoostPowerDownRoutine()
     {
         yield return _powerupWaitTime;
 
         _speedBoost = _speedBoostBaseCoefficient;
+    }
+
+    IEnumerator ScatterShotPowerDownRoutine()
+    {
+        yield return _powerupWaitTime;
+
+        _isScatterShotActive = false;
     }
 }
