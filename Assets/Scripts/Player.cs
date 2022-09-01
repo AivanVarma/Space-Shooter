@@ -176,7 +176,7 @@ public class Player : MonoBehaviour
 
     private void FireLaser()
     {
-        //_ammoCount--;
+        _ammoCount--;
 
         _uiManager.UpdateAmmoCount(_ammoCount, _maxAmmo);
 
@@ -215,7 +215,7 @@ public class Player : MonoBehaviour
             return;
         }
 
-        //_lives--;
+        _lives--;
 
         EngineDamage();
 
@@ -225,9 +225,11 @@ public class Player : MonoBehaviour
 
         if (_lives < 1)
         {
-            _spawnManager.OnPlayerDeath();
+            _spawnManager.StopSpawning();
 
             Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
+
+            _uiManager.GameOver(false);
 
             Destroy(this.gameObject);
         }
@@ -384,7 +386,6 @@ public class Player : MonoBehaviour
         {
             AddPoints(_pointsWhenMissilesFull);
         }
-
     }
 
     public void AddPoints(int points)

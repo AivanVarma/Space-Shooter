@@ -9,6 +9,7 @@ public class Boss : MonoBehaviour
 
     private int[] _points = { 50, 100, 1000 }; // Shield shot, Body shot, Death
 
+    private Vector3 _startPosition = new Vector3(0f, 10f, 0f);
     private float _yStopPosition = 3.39f;
     private bool _stoppedMoving = false;
     private float _speed = 3f;
@@ -69,6 +70,7 @@ public class Boss : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        transform.position = _startPosition;
         _player = GameObject.Find("Player").GetComponent<Player>();
 
         if (_player == null)
@@ -281,6 +283,7 @@ public class Boss : MonoBehaviour
     {
         _player.AddPoints(_points[2]);
 
+        GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>().StopSpawning();
         
         int rnd;
 
@@ -290,9 +293,11 @@ public class Boss : MonoBehaviour
             _explosionPositions.Add(rnd);
         }
 
+        Destroy(GetComponent<Collider2D>());
+
         StartCoroutine(DeathRoutine());
 
-        Destroy(this.transform.GetComponent<SpriteRenderer>(), 0.5f);
+        Destroy(GetComponent<SpriteRenderer>(), 0.5f);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -347,6 +352,8 @@ public class Boss : MonoBehaviour
 
             yield return _waitBetweenExplosions;
         }
+
+        GameObject.Find("Canvas").GetComponent<UIManager>().GameOver(true);
 
         Destroy(this.gameObject);
     }

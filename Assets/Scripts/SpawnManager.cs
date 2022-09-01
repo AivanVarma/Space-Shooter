@@ -21,8 +21,14 @@ public class SpawnManager : MonoBehaviour
     private GameObject[] _powerups;
     private float _minSpawnTimePowerup = 3f;
     private float _maxSpawnTimePowerup = 7f;
-    private int[] _powerupWeights = { 6, 6, 3, 1, 20, 2, 2, 1 }; // Triple shot, Speed, Shield, Health, Ammo, Scatter shot, Negative Speed, Missiles
+    private int[] _powerupWeights = { 6, 6, 3, 1, 20, 2, 2, 2 }; // Triple shot, Speed, Shield, Health, Ammo, Scatter shot, Negative Speed, Missiles
     private int _powerupWeightsSum;
+
+    [SerializeField]
+    private GameObject _bossPrefab;
+
+    [SerializeField]
+    private GameObject _asteroidPrefab;
 
     private bool _stopSpawning = false;
 
@@ -31,7 +37,8 @@ public class SpawnManager : MonoBehaviour
     private WaitForSeconds _waitBetweenWaves = new WaitForSeconds(6f);
     private WaitForSeconds _waitSpawning = new WaitForSeconds(1f);
 
-    private int _wavesTotal = 5;
+    private int _wavesTotal = 6;
+    private int _currentWave = 1;
     private int _enemiesBaseAmount = 5;
     private int _enemiesSpawned = 0;
 
@@ -49,6 +56,8 @@ public class SpawnManager : MonoBehaviour
         _enemyWeightsSum = WeightsSum(_enemyWeights);
         _powerupWeightsSum = WeightsSum(_powerupWeights);
         _rotationWeightsSum = WeightsSum(_rotationWeights);
+
+        Instantiate(_asteroidPrefab, transform.position, Quaternion.identity);
     }
 
     private int WeightsSum(int[] weights)
@@ -82,6 +91,13 @@ public class SpawnManager : MonoBehaviour
         return i;
     }
 
+    private void SpawnBoss()
+    {
+        Instantiate(_bossPrefab, transform.position, Quaternion.identity);
+
+        StartCoroutine(SpawnPowerupRoutine());
+    }
+
     public void StartSpawning()
     {
         StartCoroutine(SpawnWavesRoutine());
@@ -89,18 +105,17 @@ public class SpawnManager : MonoBehaviour
 
     IEnumerator SpawnWavesRoutine()
     {
-        int wave = 1;
-        int enemiesInWave = _enemiesBaseAmount;
+        int enemiesInWave = _enemiesBaseAmount * _currentWave;
         bool allEnemiesSpawned = false;
 
-        _uiManager.ShowWaveNumber(wave);
+        _uiManager.ShowWaveNumber(_currentWave);
 
         yield return _waitBetweenWaves;
 
         Coroutine spawnEnemies = StartCoroutine(SpawnEnemyRoutine());
         Coroutine spawnPowerups = StartCoroutine(SpawnPowerupRoutine());
 
-        while (wave <= _wavesTotal)
+        while (_currentWave <= _wavesTotal)
         {
             if (_enemiesSpawned == enemiesInWave && !allEnemiesSpawned)
             {
@@ -113,24 +128,35 @@ public class SpawnManager : MonoBehaviour
                 StopCoroutine(spawnPowerups);
                 _enemiesSpawned = 0;
 
-                if (wave < _wavesTotal)
+                if (_currentWave < _wavesTotal)
                 {
-                    wave++;
+                    _currentWave++;
 
-                    enemiesInWave = _enemiesBaseAmount * wave;
+                    enemiesInWave = _enemiesBaseAmount * _currentWave;
                     allEnemiesSpawned = false;
                     _enemiesSpawned = 0;
 
-                    _uiManager.ShowWaveNumber(wave);
+                    _uiManager.ShowWaveNumber(_currentWave);
 
                     yield return _waitBetweenWaves;
 
                     spawnEnemies = StartCoroutine(SpawnEnemyRoutine());
                     spawnPowerups = StartCoroutine(SpawnPowerupRoutine());
                 }
+                else
+                {
+                    _currentWave++;
+                }
             }
 
             yield return _waitSpawning;
+        }
+
+        if (_currentWave > _wavesTotal)
+        {
+            yield return _waitBetweenWaves;
+
+            SpawnBoss();
         }
     }
 
@@ -196,7 +222,7 @@ public class SpawnManager : MonoBehaviour
         }
     }
 
-    public void OnPlayerDeath()
+    public void StopSpawning()
     {
         _stopSpawning = true;
     }

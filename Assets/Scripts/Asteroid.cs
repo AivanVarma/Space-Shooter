@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Asteroid : MonoBehaviour
 {
+    private Vector3 _startingPosition = new Vector3(0f, 3.5f, 0f);
     private Vector3 _rotation = new Vector3(0f, 0f, 6f);
 
     [SerializeField]
@@ -14,6 +15,8 @@ public class Asteroid : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        transform.position = _startingPosition;
+
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
     }
 
