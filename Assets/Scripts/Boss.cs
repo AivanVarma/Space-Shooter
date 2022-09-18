@@ -34,7 +34,7 @@ public class Boss : MonoBehaviour
     [SerializeField]
     private GameObject _laserPrefab;
     private int _degreesBetweenLasers = 10;
-    private int _maxSpredDeg = 90;
+    private int _maxSpreadDeg = 90;
     private float _canFireLaser;
     private float _laserFireRate;
     private float _minLaserFireRate = 1f;
@@ -196,7 +196,7 @@ public class Boss : MonoBehaviour
         int deg = 0;
         GameObject laser;
 
-        while (degrees <= _maxSpredDeg)
+        while (degrees <= _maxSpreadDeg)
         {
             for (int i = 0; i < _laserBanks.Length; i++)
             {
@@ -227,7 +227,7 @@ public class Boss : MonoBehaviour
         int deg = 0;
         GameObject missile;
 
-        while (degrees <= _maxSpredDeg)
+        while (degrees <= _maxSpreadDeg)
         {
             for (int i = 0; i < _missileBanks.Length; i++)
             {

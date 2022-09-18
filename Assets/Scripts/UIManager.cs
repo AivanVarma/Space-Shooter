@@ -53,7 +53,7 @@ public class UIManager : MonoBehaviour
         _restartText.gameObject.SetActive(false);
         _victoryText.gameObject.SetActive(false);
         _victoryScoreText.gameObject.SetActive(false);
-        _helpText.gameObject.SetActive(true);
+        //_helpText.gameObject.SetActive(true);
 
         _gameManager = GameObject.Find("Game_Manager").GetComponent<GameManager>();
 

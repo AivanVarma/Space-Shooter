@@ -57,7 +57,7 @@ public class SpawnManager : MonoBehaviour
         _powerupWeightsSum = WeightsSum(_powerupWeights);
         _rotationWeightsSum = WeightsSum(_rotationWeights);
 
-        Instantiate(_asteroidPrefab, transform.position, Quaternion.identity);
+       // Instantiate(_asteroidPrefab, transform.position, Quaternion.identity);
     }
 
     private int WeightsSum(int[] weights)
